@@ -1,0 +1,45 @@
+# General
+*.swp
+*.swo
+*.bak
+*.tmp
+*.log
+.DS_Store
+Thumbs.db
+
+# ROS 2 workspace (colcon build system)
+ros2_ws/build/
+ros2_ws/install/
+ros2_ws/log/
+
+# Python cache (if using Python scripts in ROS 2)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Embedded system (C/C++, PlatformIO, STM32, Arduino, etc.)
+embedded/build/
+embedded/.pio/
+embedded/.vscode/
+embedded/.clangd/
+embedded/.ccls-cache/
+embedded/*.elf
+embedded/*.bin
+embedded/*.hex
+embedded/*.map
+embedded/*.o
+embedded/*.d
+embedded/.dep/
+embedded/.idea/
+
+# Git submodule lock (if using submodules)
+.gitmodules
+.git-submodule/
+
+# JetBrains IDE (CLion, PyCharm, etc.)
+.idea/
+
+# VS Code settings
+.vscode/
+*.code-workspace
