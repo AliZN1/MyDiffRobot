@@ -18,21 +18,6 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Embedded system (C/C++, PlatformIO, STM32, Arduino, etc.)
-embedded/build/
-embedded/.pio/
-embedded/.vscode/
-embedded/.clangd/
-embedded/.ccls-cache/
-embedded/*.elf
-embedded/*.bin
-embedded/*.hex
-embedded/*.map
-embedded/*.o
-embedded/*.d
-embedded/.dep/
-embedded/.idea/
-
 # Git submodule lock (if using submodules)
 .gitmodules
 .git-submodule/
@@ -43,3 +28,6 @@ embedded/.idea/
 # VS Code settings
 .vscode/
 *.code-workspace
+
+# test files
+test.py
