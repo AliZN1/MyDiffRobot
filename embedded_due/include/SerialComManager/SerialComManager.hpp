@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 #include <cppQueue.h>
+#include <Config.hpp>
 
-#define NUM_CHAR 50
 #define QUEUE_SIZE 5
 
 
@@ -15,7 +15,7 @@ private:
 public:
     SerialManager(UARTClass &b_serial);
     ~SerialManager();
-    void push_msg(const char message[NUM_CHAR]);
+    void push_msg(const char message[numChar]);
     void send_msg();
 };
 

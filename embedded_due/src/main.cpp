@@ -2,6 +2,7 @@
 #include <Main.hpp>
 
 SerialManager serialManager(Serial);
+EncodersManager encodersManager(A0, A1, serialManager);
 
 void setup() {
   // put your setup code here, to run once:

@@ -40,9 +40,10 @@ double Encoder::updateAngDisp(){
 }
 
 // ------------------------------------ EncoderManager
-EncodersManager::EncodersManager(uint8_t pin_right, uint8_t pin_left):
+EncodersManager::EncodersManager(uint8_t pin_right, uint8_t pin_left, SerialManager &sm):
     enc_R(pin_right),
-    enc_L(pin_left)
+    enc_L(pin_left),
+    serialManager(sm)
 {}
 
 EncodersManager::~EncodersManager(){}
@@ -51,7 +52,7 @@ void EncodersManager::angularPos(){
     double angPos_R = enc_R.updateAngDisp();
     double angPos_L = enc_L.updateAngDisp();
     
-    char result_str[100];
-    sprintf(result_str, "%d", 10);
-    Serial.print(result_str);
+    char result_str[numChar];
+    sprintf(result_str, "@E:%.4f,%.4f;\n", angPos_R, angPos_L);
+    serialManager.push_msg(result_str);
 }

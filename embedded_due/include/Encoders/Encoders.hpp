@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <Config.hpp>
 #include <stdlib.h>
+#include <SerialComManager/SerialComManager.hpp>
 
 using namespace std;
 
@@ -29,10 +30,12 @@ class EncodersManager{
 private:
     Encoder enc_R;
     Encoder enc_L;
+    SerialManager &serialManager;
 public:
     EncodersManager(
         uint8_t pin_R,
-        uint8_t pin_L
+        uint8_t pin_L,
+        SerialManager &sm
     );
     ~EncodersManager();
     void angularPos();
