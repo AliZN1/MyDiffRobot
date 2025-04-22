@@ -6,6 +6,7 @@
 #include <Config.hpp>
 #include <stdlib.h>
 #include <SerialComManager/SerialComManager.hpp>
+#include "TaskManager/Task.hpp"
 
 using namespace std;
 
@@ -26,16 +27,19 @@ public:
 };
 
 // ------------------------------------ EncoderManager
-class EncodersManager{
+class EncodersManager: public Task{
 private:
     Encoder enc_R;
     Encoder enc_L;
     SerialManager &serialManager;
+protected:
+    void execute() override;
 public:
     EncodersManager(
         uint8_t pin_R,
         uint8_t pin_L,
-        SerialManager &sm
+        SerialManager &sm,
+        uint16_t num_ticks
     );
     ~EncodersManager();
     void angularPos();

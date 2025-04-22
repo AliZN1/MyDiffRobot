@@ -1,9 +1,8 @@
 #include "SerialComManager/SerialComManager.hpp"
 
 
-SerialManager::SerialManager(UARTClass &b_serial):
-    serial(b_serial), msg_output(numChar, QUEUE_SIZE, FIFO)
-{}
+SerialManager::SerialManager(UARTClass &b_serial, uint16_t num_tick)
+    :  Task(num_tick), serial(b_serial), msg_output(numChar, QUEUE_SIZE, FIFO) {}
 
 SerialManager::~SerialManager(){}
 
@@ -19,4 +18,8 @@ void SerialManager::send_msg(){
         msg_output.pop(msg);
         serial.println(msg);
     }
+}
+
+void SerialManager::execute(){
+    send_msg();
 }
