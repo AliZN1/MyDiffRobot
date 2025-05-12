@@ -1,13 +1,22 @@
-#include "Encoders/Encoders.hpp"
+#include "Wheels/Encoders.hpp"
 
 // ------------------------------------ Encoder
 Encoder::Encoder(uint8_t pin_num): 
-    pin(pin_num)
+    pin(pin_num), uperLimit(1023), lowerLimit(0), last_angle(0)
 {
-    last_angle = readAngle();
+    // last_angle = readAngle();
 };
 
 Encoder::~Encoder(){};
+
+void Encoder::setLimits(uint16_t min, uint16_t max){
+    lowerLimit = min;
+    uperLimit = max;
+}
+
+void Encoder::initLastAngle(){
+    last_angle = readAngle();
+}
 
 double Encoder::readAngle(){
     double read = analogRead(pin);
@@ -17,11 +26,6 @@ double Encoder::readAngle(){
         read = lowerLimit;
 
     return (read - lowerLimit)/(uperLimit - lowerLimit) * 2 * pi;
-}
-
-void Encoder::setLimits(uint16_t min, uint16_t max){
-    lowerLimit = min;
-    uperLimit = max;
 }
 
 double Encoder::updateAngDisp(){
@@ -35,7 +39,6 @@ double Encoder::updateAngDisp(){
     else if (delta < -pi){
         numTurns++;
     }
-    
     return numTurns * 2*pi + last_angle;
 }
 
@@ -48,12 +51,18 @@ EncodersManager::~EncodersManager(){}
 void EncodersManager::angularPos(){
     double angPos_R = enc_R.updateAngDisp();
     double angPos_L = enc_L.updateAngDisp();
-    
-    char result_str[numChar];
+
+    char result_str[maxNumChar];
     sprintf(result_str, "@E:%.4f,%.4f;\n", angPos_R, angPos_L);
     serialManager.push_msg(result_str);
 }
 
+void EncodersManager::initLastAngles(){
+    enc_R.initLastAngle();
+    enc_L.initLastAngle();
+}
+
 void EncodersManager::execute(){
+    delay(100);
     angularPos();
 }

@@ -8,7 +8,7 @@ TaskManager::~TaskManager(){}
 
 void TaskManager::run(){
     uint32_t now = micros();
-
+    
     for(int i = 0; i < listSize; ++i){
         prt_taskList[i] -> run(now);
     }

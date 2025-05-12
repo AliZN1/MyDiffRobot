@@ -1,23 +1,24 @@
 #include <Arduino.h>
 #include <Main.hpp>
 
-SerialManager serialManager(Serial, 50);
-EncodersManager encodersManager(A0, A1, serialManager, 200);
+WheelsCon wheelController(2, 3, 4, 5);
+SerialManager serialManager(Serial, 1, wheelController);
+EncodersManager encodersManager(A0, A1, serialManager, 500);
 
 Task* taskList[] = {
   &serialManager,
-  &encodersManager,
+  // &encodersManager,
 };
-
 TaskManager taskManager(taskList, sizeof(taskList)/sizeof(Task*));
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(115200);
+  encodersManager.initLastAngles();
+  
+  delay(100);
+  Serial.println("I'm alive!");
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  // enc_manager.angularPos();
   taskManager.run();
 }

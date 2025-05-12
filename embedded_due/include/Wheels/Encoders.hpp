@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <Arduino.h>
 #include <Config.hpp>
-#include <stdlib.h>
 #include <SerialComManager/SerialComManager.hpp>
 #include "TaskManager/Task.hpp"
 
@@ -22,8 +21,9 @@ public:
     Encoder(uint8_t pin_num);
     ~Encoder();
     double readAngle();
-    void setLimits(uint16_t min, uint16_t max);
     double updateAngDisp();
+    void setLimits(uint16_t min, uint16_t max);
+    void initLastAngle();
 };
 
 // ------------------------------------ EncoderManager
@@ -43,6 +43,7 @@ public:
     );
     ~EncodersManager();
     void angularPos();
+    void initLastAngles();
 };
 
 #endif
