@@ -7,7 +7,7 @@ EncodersManager encodersManager(A0, A1, serialManager, 500);
 
 Task* taskList[] = {
   &serialManager,
-  // &encodersManager,
+  &encodersManager,
 };
 TaskManager taskManager(taskList, sizeof(taskList)/sizeof(Task*));
 

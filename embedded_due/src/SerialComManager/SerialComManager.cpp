@@ -46,20 +46,39 @@ void SerialManager::read_msg(){
 }
 
 void SerialManager::processMessage(const char (&msg)[maxNumChar]){
-    if(msg[0] != '#'){
+    if(msg[0] != '#' || msg[3] != ':'){
         // next two lines are use for debuging
-        char warning[maxNumChar] = "Incorrect input!";
-        push_msg(warning);
-        
+        // char warning[maxNumChar] = "# or : was lost!";
+        // push_msg(warning);
+
         return;
     }
-    if(strstr(msg, "FW")){
-        // wheelsCon.moveFW(100);
-        Serial.println("Forward");
+    char command[10] = {0};
+    int value = 0;
+    int res = sscanf(msg, "#%[^:]:%d;", command, &value);
+    
+    if(res != 2){
+        // next two lines are use for debuging
+        // char warning[maxNumChar] = "Command or value caused error!";
+        // push_msg(warning);   
+        return;
     }
-    else if(strstr(msg, "BW")){
-        // wheelsCon.moveBW(100);
-        Serial.println("Backward");
+
+    if(strcmp(command, "MS") == 0){ // Move with this speed
+        if(value == 0)
+            wheelsCon.stop();
+        else if(value > 0 && value < 255)
+            wheelsCon.moveFW(value);
+        else if(value < 0 && value > -255)
+            wheelsCon.moveBW(-value);
+    }
+    else if(strcmp(command, "RS") == 0){ // Rotate with this speed
+        if(value == 0)
+            wheelsCon.stop();
+        else if(value > 0 && value < 255)
+            wheelsCon.rotateCW(value);
+        else if(value < 0 && value > -255)
+            wheelsCon.rotateCCW(-value);
     }
 }
 

@@ -26,6 +26,8 @@ public:
     ~WheelsCon();
     void moveFW(const uint8_t speed);
     void moveBW(const uint8_t speed);
+    void rotateCW(const uint8_t speed);
+    void rotateCCW(const uint8_t speed);
     void stop();
 };
 

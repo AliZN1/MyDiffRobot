@@ -7,18 +7,18 @@ Wheel::Wheel(const uint8_t pinA, const uint8_t pinB):
 Wheel::~Wheel(){}
 
 void Wheel::moveForward(const uint8_t speed){
-    digitalWrite(pin_A, 0);
+    analogWrite(pin_A, 0);
     analogWrite(pin_B, speed);
 }
 
 void Wheel::moveBackward(const uint8_t speed){
     analogWrite(pin_A, speed);
-    digitalWrite(pin_B, 0);
+    analogWrite(pin_B, 0);
 }
 
 void Wheel::stop(){
-    digitalWrite(pin_A, 0);
-    digitalWrite(pin_B, 0);
+    analogWrite(pin_A, 0);
+    analogWrite(pin_B, 0);
 }
 
 // wheels controller class
@@ -34,6 +34,16 @@ void WheelsCon::moveFW(const uint8_t speed){
 
 void WheelsCon::moveBW(const uint8_t speed){
     wheel_R.moveBackward(speed);
+    wheel_L.moveBackward(speed);
+}
+
+void WheelsCon::rotateCW(const uint8_t speed){
+    wheel_R.moveBackward(speed);
+    wheel_L.moveForward(speed);
+}
+
+void WheelsCon::rotateCCW(const uint8_t speed){
+    wheel_R.moveForward(speed);
     wheel_L.moveBackward(speed);
 }
 
