@@ -16,7 +16,7 @@ void SerialManager::send_msg(){
     if(!msg_output.isEmpty()){
         char msg [maxNumChar];
         msg_output.pop(msg);
-        serial.println(msg);
+        serial.print(msg);
     }
 }
 

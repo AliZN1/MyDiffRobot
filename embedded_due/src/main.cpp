@@ -3,7 +3,7 @@
 
 WheelsCon wheelController(2, 3, 4, 5);
 SerialManager serialManager(Serial, 1, wheelController);
-EncodersManager encodersManager(A0, A1, serialManager, 500);
+EncodersManager encodersManager(A1, A0, serialManager, 100);
 
 Task* taskList[] = {
   &serialManager,
@@ -14,7 +14,7 @@ TaskManager taskManager(taskList, sizeof(taskList)/sizeof(Task*));
 void setup() {
   Serial.begin(115200);
   encodersManager.initLastAngles();
-  
+
   delay(100);
   Serial.println("I'm alive!");
 }

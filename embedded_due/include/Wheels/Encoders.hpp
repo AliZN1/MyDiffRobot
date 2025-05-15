@@ -16,9 +16,11 @@ private:
     uint16_t uperLimit;
     uint16_t lowerLimit;
     double last_angle;
-    uint32_t numTurns;
+    int32_t numTurns;
+    double initAngle;
+    int8_t dir;
 public:
-    Encoder(uint8_t pin_num);
+    Encoder(uint8_t pin_num, bool reverseDir = false);
     ~Encoder();
     double readAngle();
     double updateAngDisp();

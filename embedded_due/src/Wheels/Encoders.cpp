@@ -1,10 +1,10 @@
 #include "Wheels/Encoders.hpp"
 
 // ------------------------------------ Encoder
-Encoder::Encoder(uint8_t pin_num): 
-    pin(pin_num), uperLimit(1023), lowerLimit(0), last_angle(0)
+Encoder::Encoder(uint8_t pin_num, bool reverseDir): 
+    pin(pin_num), uperLimit(1023), lowerLimit(0), last_angle(0), numTurns(0)
 {
-    // last_angle = readAngle();
+    dir = reverseDir? -1 : 1;
 };
 
 Encoder::~Encoder(){};
@@ -15,7 +15,8 @@ void Encoder::setLimits(uint16_t min, uint16_t max){
 }
 
 void Encoder::initLastAngle(){
-    last_angle = readAngle();
+    initAngle = readAngle();
+    last_angle = initAngle;
 }
 
 double Encoder::readAngle(){
@@ -39,12 +40,12 @@ double Encoder::updateAngDisp(){
     else if (delta < -pi){
         numTurns++;
     }
-    return numTurns * 2*pi + last_angle;
+    return (numTurns * 2*pi + currentAngle - initAngle) * dir;
 }
 
 // ------------------------------------ EncoderManager
 EncodersManager::EncodersManager(uint8_t pin_right, uint8_t pin_left, SerialManager &sm, uint16_t num_ticks)
-    : Task(num_ticks), enc_R(pin_right), enc_L(pin_left), serialManager(sm) {}
+    : Task(num_ticks), enc_R(pin_right), enc_L(pin_left, true), serialManager(sm) {}
 
 EncodersManager::~EncodersManager(){}
 
