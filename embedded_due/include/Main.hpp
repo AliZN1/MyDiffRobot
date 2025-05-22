@@ -6,5 +6,6 @@
 #include <Wheels/Encoders.hpp>
 #include <Wheels/WheelsCon.hpp>
 #include <TaskManager/TaskManager.hpp>
+#include <IMU/IMU.hpp>
 
 #endif
