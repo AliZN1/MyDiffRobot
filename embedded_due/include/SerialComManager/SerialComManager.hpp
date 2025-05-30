@@ -10,11 +10,12 @@
 
 #define QUEUE_SIZE 5
 
+class WheelsCon;
 
 class SerialManager: public Task{
 private:
     UARTClass &serial;
-    WheelsCon &wheelsCon;
+    // WheelsCon &wheelsCon;
     cppQueue msg_output;
     char inputBuffer[maxNumChar];
     uint8_t inputByteIndex;
@@ -22,12 +23,13 @@ private:
 protected:
     void execute() override;
 public:
-    SerialManager(UARTClass &b_serial, uint16_t num_tick, WheelsCon &WheelsCon);
+    SerialManager(UARTClass &b_serial, uint16_t num_tick);
     ~SerialManager();
     void push_msg(const char message[maxNumChar]);
     void send_msg();
     void read_msg();
     void processMessage(const char (&msg)[maxNumChar]);
+    // void setWheelsCon(WheelsCon &wheelController);
 };
 
 #endif

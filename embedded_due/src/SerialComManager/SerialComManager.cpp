@@ -1,8 +1,8 @@
 #include "SerialComManager/SerialComManager.hpp"
 
 
-SerialManager::SerialManager(UARTClass &b_serial, uint16_t num_tick, WheelsCon &WheelsControllers)
-    :  Task(num_tick), serial(b_serial), wheelsCon(WheelsControllers), msg_output(maxNumChar, QUEUE_SIZE, FIFO) {}
+SerialManager::SerialManager(UARTClass &b_serial, uint16_t num_tick)
+    :  Task(num_tick), serial(b_serial), msg_output(maxNumChar, QUEUE_SIZE, FIFO) {}
 
 SerialManager::~SerialManager(){}
 
@@ -64,22 +64,25 @@ void SerialManager::processMessage(const char (&msg)[maxNumChar]){
         return;
     }
 
-    if(strcmp(command, "MS") == 0){ // Move with this speed
-        if(value == 0)
-            wheelsCon.stop();
-        else if(value > 0 && value < 255)
-            wheelsCon.moveFW(value);
-        else if(value < 0 && value > -255)
-            wheelsCon.moveBW(-value);
-    }
-    else if(strcmp(command, "RS") == 0){ // Rotate with this speed
-        if(value == 0)
-            wheelsCon.stop();
-        else if(value > 0 && value < 255)
-            wheelsCon.rotateCW(value);
-        else if(value < 0 && value > -255)
-            wheelsCon.rotateCCW(-value);
-    }
+    // if(strcmp(command, "MS") == 0){ // Move with this speed
+    //     if(value == 0)
+    //         wheelsCon.stop();
+    //     else if(value > 0 && value < 255)
+    //         wheelsCon.moveFW(value);
+    //     else if(value < 0 && value > -255)
+    //         wheelsCon.moveBW(-value);
+    // }
+    // else if(strcmp(command, "RS") == 0){ // Rotate with this speed
+    //     if(value == 0)
+    //         wheelsCon.stop();
+    //     else if(value > 0 && value < 255)
+    //         wheelsCon.rotateCW(value);
+    //     else if(value < 0 && value > -255)
+    //         wheelsCon.rotateCCW(-value);
+    // }
 }
 
+// void SerialManager::setWheelsCon(WheelsCon &wheelController){
+//     wheelsCon = wheelController;
+// }
 
