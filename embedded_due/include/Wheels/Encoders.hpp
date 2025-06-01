@@ -9,9 +9,9 @@
 
 
 using namespace std;
-class SerialManager;
+class SerialPublisher;
 
-#define omega_min_dt 150 // ms
+#define omega_min_dt 100 // ms
 
 // ------------------------------------ Encoder
 class Encoder{
@@ -41,21 +41,25 @@ class EncodersManager: public Task{
 private:
     Encoder enc_R;
     Encoder enc_L;
-    SerialManager &serialManager;
+    SerialPublisher &serialPublisher;
     uint32_t last_omegaStamp;
+    bool publish;
 protected:
     void execute() override;
 public:
     EncodersManager(
         uint8_t pin_R,
         uint8_t pin_L,
-        SerialManager &sm,
+        SerialPublisher &sp,
         uint16_t num_ticks
     );
     ~EncodersManager();
     void angularPos(double (&angPosArr)[2]);
+    void angularVel(double (&angPosArr)[2]);
     void initLastAngles();
     void getAngVel(float (&angVel)[2]); // return right and left omega respectively
+    void pub_encoders(double (&cur_angPosArr)[2]);
+    void set_publish(bool state);
 };
 
 #endif

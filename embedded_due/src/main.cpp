@@ -3,16 +3,19 @@
 
 uint8_t motorDriverPins[] = {2, 3, 4, 5}; // {m1_A, m1_B, m2_A, m2_B}
 
-SerialManager serialManager(Serial, 1);
-EncodersManager encodersManager(A1, A0, serialManager, 100);
-WheelsCon wheelController(motorDriverPins, encodersManager, 100);
-// IMU imu(serialManager, 50);
+SerialPublisher serialPublisher(Serial, 1);
+EncodersManager encodersManager(A1, A0, serialPublisher, 100);
+WheelsCon wheelController(motorDriverPins, encodersManager, 70);
+IMU imu(serialPublisher, 50);
+
+SerialReceiver serialReceiver(Serial, 1, wheelController, encodersManager, imu);
 
 Task* taskList[] = {
-  &serialManager,
+  &serialPublisher,
+  &serialReceiver,
   &encodersManager,
   &wheelController,
-  // &imu,
+  &imu,
 };
 TaskManager taskManager(taskList, sizeof(taskList)/sizeof(Task*));
 
@@ -26,25 +29,25 @@ void setup() {
   Serial.println("I'm alive!");
   encodersManager.initLastAngles();
 
-  // if(!imu.begin())
-  //   Serial.println("MPU is not connected!");
+  if(!imu.begin())
+    Serial.println("MPU is not connected!");
 
-  // wheelController.moveFW(5);
+  // wheelController.move_cmd(10);
 }
 
 void loop() {
   taskManager.run();
 
-  uint32_t now = millis();
-  if(now > last_time + 10000){
-    if(i > 15){
-      wheelController.stop();
-      return;
-    }
+  // uint32_t now = millis();
+  // if(now > last_time + 10000){
+  //   if(i > 15){
+  //     wheelController.stop();
+  //     return;
+  //   }
 
-    wheelController.moveFW(i);
-    Serial.println(i);
-    i += 2;
-    last_time = now;
-  }
+  //   wheelController.move_cmd(i);
+  //   Serial.println(i);
+  //   i += 2;
+  //   last_time = now;
+  // }
 }

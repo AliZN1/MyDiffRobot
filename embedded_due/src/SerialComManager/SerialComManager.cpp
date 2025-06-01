@@ -1,18 +1,24 @@
 #include "SerialComManager/SerialComManager.hpp"
 
 
-SerialManager::SerialManager(UARTClass &b_serial, uint16_t num_tick)
+//------------------- Serial Publisher class members
+
+SerialPublisher::SerialPublisher(UARTClass &b_serial, uint16_t num_tick)
     :  Task(num_tick), serial(b_serial), msg_output(maxNumChar, QUEUE_SIZE, FIFO) {}
 
-SerialManager::~SerialManager(){}
+SerialPublisher::~SerialPublisher(){}
 
-void SerialManager::push_msg(const char msg[maxNumChar]) {
+void SerialPublisher::execute(){
+    send_msg();
+}
+
+void SerialPublisher::push_msg(const char msg[maxNumChar]) {
     char temp[maxNumChar];
     strncpy(temp, msg, maxNumChar - 1);  // Copy message into a temporary array
     msg_output.push(temp);      // Push the copied message into the queue
 }
 
-void SerialManager::send_msg(){
+void SerialPublisher::send_msg(){
     if(!msg_output.isEmpty()){
         char msg [maxNumChar];
         msg_output.pop(msg);
@@ -20,19 +26,24 @@ void SerialManager::send_msg(){
     }
 }
 
-void SerialManager::execute(){
-    send_msg();
+//------------------- Serial Receiver class members
+
+SerialReceiver::SerialReceiver(UARTClass &b_serial, uint16_t num_tick, WheelsCon &wheelsController, EncodersManager &encoders_manager, IMU &IMU_sensor)
+    : Task(num_tick), serial(b_serial), wheelsCon(wheelsController), encodersManager(encoders_manager), imu(IMU_sensor) {}
+
+SerialReceiver::~SerialReceiver(){ }
+
+void SerialReceiver::execute(){
     read_msg();
 }
 
-void SerialManager::resetInputBuffer(){
+void SerialReceiver::resetInputBuffer(){
     inputBuffer[maxNumChar-1] = '\0';
     inputByteIndex = 0;
 }
 
-void SerialManager::read_msg(){
-    if(serial.available() <= 0)
-        return;
+void SerialReceiver::read_msg(){
+    if(serial.available() <= 0) return;
     char incomingByte = serial.read();
     if(incomingByte == '\n'){
         resetInputBuffer();
@@ -45,44 +56,40 @@ void SerialManager::read_msg(){
     }
 }
 
-void SerialManager::processMessage(const char (&msg)[maxNumChar]){
+void SerialReceiver::processMessage(const char (&msg)[maxNumChar]){
     if(msg[0] != '#' || msg[3] != ':'){
-        // next two lines are use for debuging
-        // char warning[maxNumChar] = "# or : was lost!";
-        // push_msg(warning);
-
+        // Serial.println("# or : was lost!");// debuging
         return;
     }
-    char command[10] = {0};
+
+    int cmd = 0;
     int value = 0;
-    int res = sscanf(msg, "#%[^:]:%d;", command, &value);
+    int8_t res = sscanf(msg, "#%2d:%d;", &cmd, &value); // update value with input cmd
     
     if(res != 2){
-        // next two lines are use for debuging
-        // char warning[maxNumChar] = "Command or value caused error!";
-        // push_msg(warning);   
+        // Serial.println("Command or value caused error!"); // debuging
         return;
     }
 
-    // if(strcmp(command, "MS") == 0){ // Move with this speed
-    //     if(value == 0)
-    //         wheelsCon.stop();
-    //     else if(value > 0 && value < 255)
-    //         wheelsCon.moveFW(value);
-    //     else if(value < 0 && value > -255)
-    //         wheelsCon.moveBW(-value);
-    // }
-    // else if(strcmp(command, "RS") == 0){ // Rotate with this speed
-    //     if(value == 0)
-    //         wheelsCon.stop();
-    //     else if(value > 0 && value < 255)
-    //         wheelsCon.rotateCW(value);
-    //     else if(value < 0 && value > -255)
-    //         wheelsCon.rotateCCW(-value);
-    // }
+    switch (cmd){
+        case move_speed:
+            if(value == 0) wheelsCon.stop();
+            else wheelsCon.move_cmd(value);
+            break;
+        case rotate_speed:
+            if(value == 0) wheelsCon.stop();
+            else if(value > 0 && value < 255) wheelsCon.rotateCW(value);
+            else if(value < 0 && value > -255) wheelsCon.rotateCCW(-value);
+            break;
+        case encoder_pub:
+            if(value == 0) encodersManager.set_publish(0);
+            else if(value == 1) encodersManager.set_publish(1);
+            break;
+        case imu_pub:
+            if(value == 0) imu.set_publish(0);
+            else if(value == 1) imu.set_publish(1);
+            break;
+        default:
+            break;
+    }
 }
-
-// void SerialManager::setWheelsCon(WheelsCon &wheelController){
-//     wheelsCon = wheelController;
-// }
-

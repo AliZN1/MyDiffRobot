@@ -1,8 +1,7 @@
 #include "IMU/IMU.hpp"
 
-IMU::IMU(SerialManager &sm, uint16_t num_ticks)
-    : Task(num_ticks), serialManager(sm), last_time(0) {
-        no_pub = 0;
+IMU::IMU(SerialPublisher &sp, uint16_t num_ticks)
+    : Task(num_ticks), serialPublisher(sp), last_time(0), last_pubTime(0), publish(false) {
         gyroYaw = 0.0;
     }
 
@@ -35,19 +34,13 @@ bool IMU::begin(){
 }
 
 void IMU::execute(){
-    if(!isConnected)
-        return;
-    int error = computeYaw();
-    // error += computeAccel();
+    if(!isConnected) return;
 
-    if(error != 1) // ensure every task succeed
-        return;
-    if(no_pub >= max_loops_with_no_pub){ // reduce the data publication freq
-        pubAccel();
-        no_pub = 0;
-    }else{
-        no_pub++;
-    }
+    int succeed = computeYaw();
+    // error += computeAccel();
+    if(succeed != 1) return; // ensure every task succeed
+    
+    pubAccel(); 
 }
 
 bool IMU::resetPM(){
@@ -91,12 +84,12 @@ void IMU::calibrate(){
 
     char msg [maxNumChar];
     sprintf(msg, "IMU calibration is done!\n");
-    serialManager.push_msg(msg);
+    serialPublisher.push_msg(msg);
 }
 
 bool IMU::readAccel(int16_t (&arr)[3]){
-    if(!isConnected)
-        return 0;
+    if(!isConnected) return 0;
+
     Wire.beginTransmission(mpu_I2CAddr);
     Wire.write(mpu_ACCEL_XOUT_H); // Set starting register (0x3B)
     Wire.endTransmission(false); // Send REPEATED START, not STOP
@@ -105,7 +98,7 @@ bool IMU::readAccel(int16_t (&arr)[3]){
     if(Wire.available() < 6){
         char msg [maxNumChar];
         sprintf(msg, "No data available for Accel!\n");
-        serialManager.push_msg(msg);
+        serialPublisher.push_msg(msg);
         return 0;
     }
 
@@ -120,8 +113,7 @@ bool IMU::computeAccel(){
     int16_t accel_data[3];
     bool res = readAccel(accel_data);
 
-    if(!res)
-        return 0;
+    if(!res) return 0;
 
     AccelX = (accel_data[0] - accelBias[0]) / accel_LSB;
     AccelY = (accel_data[1] - accelBias[1]) / accel_LSB;
@@ -131,8 +123,8 @@ bool IMU::computeAccel(){
 }
 
 bool IMU::readGyro(int16_t &arr){
-    if(!isConnected)
-        return 0;
+    if(!isConnected) return 0;
+
     Wire.beginTransmission(mpu_I2CAddr);
     Wire.write(mpu_GYRO_ZOUT_H);
     Wire.endTransmission(false);
@@ -142,7 +134,7 @@ bool IMU::readGyro(int16_t &arr){
     if(Wire.available() < 6){
         char msg [maxNumChar];
         sprintf(msg, "No data available for Gyro!\n");
-        serialManager.push_msg(msg);
+        serialPublisher.push_msg(msg);
         return 0;
     }
 
@@ -154,13 +146,11 @@ bool IMU::computeYaw(){
     int16_t gyro_data;
     bool res = readGyro(gyro_data);
     
-    if(!res)
-        return 0;
+    if(!res) return 0;
 
-    if(gyro_data >= gyroBiasMin && gyro_data <= gyroBiasMax)
-        gyro_data = 0;
-    else
-        gyro_data -= gyroBiasMean;
+    if(gyro_data >= gyroBiasMin && gyro_data <= gyroBiasMax) gyro_data = 0;
+    else gyro_data -= gyroBiasMean;
+
     float GyroZ = gyro_data / gyro_LSB;
     float elapsedTime = (current_time - last_time) / 1000000.0;
     last_time = current_time;
@@ -170,7 +160,18 @@ bool IMU::computeYaw(){
 }
 
 void IMU::pubAccel(){
+    if(!publish) return;
+
+    uint32_t now = millis();
+    uint32_t dt = now - last_pubTime;
+    if(dt < pub_delay) return;// reduce the data publication freq
+
     char msg [maxNumChar];
     sprintf(msg, "@I:%.4f\n", gyroYaw);
-    serialManager.push_msg(msg);
+    serialPublisher.push_msg(msg);
+    last_pubTime = now;
+}
+
+void IMU::set_publish(bool state){
+    publish = state;
 }

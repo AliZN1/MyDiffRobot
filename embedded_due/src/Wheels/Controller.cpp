@@ -1,14 +1,13 @@
 #include "Wheels/Controller.hpp"
 
 
-PID::PID(float K_p, float K_i, float K_d, float time_const): 
-    kp(K_p), ki(K_i), kd(K_d), tau(time_const), setpoint(0) {}
+PID::PID(float K_p, float K_i, float K_d, float k_ff, float time_const): 
+    kp(K_p), ki(K_i), kd(K_d), kff(k_ff), tau(time_const), setpoint(0) {}
 
 PID::~PID(){}
 
 double PID::run(const double current){
     double error = setpoint - current;
-
     uint32_t now = millis();
     float dt = (now - last_time) / 1000.0;
     //compute P, I, and D values
@@ -16,6 +15,7 @@ double PID::run(const double current){
     double alpha = tau / (tau + dt);
     double filtered_derivative = alpha * last_derivative + (1 - alpha) * (error - last_error) / dt;
     double output = kp * error + ki * (integral_curr + integral) +  kd * filtered_derivative;
+    output += kff * setpoint;
     //apply saturation and anti-windup
     bool allow_integral = true;
     if(output > max_sat){

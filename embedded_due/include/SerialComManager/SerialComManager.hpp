@@ -7,29 +7,50 @@
 #include <Config.hpp>
 #include "TaskManager/Task.hpp"
 #include "Wheels/WheelsCon.hpp"
+#include "IMU/IMU.hpp"
 
 #define QUEUE_SIZE 5
 
 class WheelsCon;
+class EncodersManager;
+class IMU;
 
-class SerialManager: public Task{
+enum serial_cmd {
+    move_speed,
+    rotate_speed,
+    encoder_pub,
+    imu_pub,
+};
+
+class SerialPublisher: public Task{
 private:
     UARTClass &serial;
-    // WheelsCon &wheelsCon;
     cppQueue msg_output;
+protected:
+    void execute() override;
+public:
+    SerialPublisher(UARTClass &b_serial, uint16_t num_tick);
+    ~SerialPublisher();
+    void push_msg(const char message[maxNumChar]);
+    void send_msg();
+};
+
+class SerialReceiver: public Task{
+private:
+    UARTClass &serial;
+    WheelsCon &wheelsCon;
+    EncodersManager &encodersManager;
+    IMU &imu;
     char inputBuffer[maxNumChar];
     uint8_t inputByteIndex;
     void resetInputBuffer();
 protected:
     void execute() override;
 public:
-    SerialManager(UARTClass &b_serial, uint16_t num_tick);
-    ~SerialManager();
-    void push_msg(const char message[maxNumChar]);
-    void send_msg();
+    SerialReceiver(UARTClass &b_serial, uint16_t num_tick, WheelsCon &wheelsController, EncodersManager &encoders_manager, IMU &IMU_sensor);
+    ~SerialReceiver();
     void read_msg();
     void processMessage(const char (&msg)[maxNumChar]);
-    // void setWheelsCon(WheelsCon &wheelController);
 };
 
 #endif

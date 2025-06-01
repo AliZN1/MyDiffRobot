@@ -42,7 +42,6 @@ double Encoder::updateAngDisp(){
         numTurns++;
     }
     return (numTurns * 2*pi + currentAngle - initAngle) * dir;
-    //compute the angular velocity of the wheel as well    
 }
 
 void Encoder::computeOmega(uint32_t &dt, double &cur_angPos){
@@ -59,19 +58,25 @@ float Encoder::getOmega(){
 }
 
 // ------------------------------------ EncoderManager
-EncodersManager::EncodersManager(uint8_t pin_right, uint8_t pin_left, SerialManager &sm, uint16_t num_ticks)
-    : Task(num_ticks), enc_R(pin_right), enc_L(pin_left, true), serialManager(sm) {}
+EncodersManager::EncodersManager(uint8_t pin_right, uint8_t pin_left, SerialPublisher &sp, uint16_t num_ticks)
+    : Task(num_ticks), enc_R(pin_right), enc_L(pin_left, true), serialPublisher(sp), publish(false) {}
 
 EncodersManager::~EncodersManager(){}
 
 void EncodersManager::angularPos(double (&angPosArr)[2]){
     angPosArr[0] = enc_R.updateAngDisp();
     angPosArr[1] = enc_L.updateAngDisp();
+}
 
-    
-    char result_str[maxNumChar];
-    sprintf(result_str, "@E:%.4f,%.4f;\n", angPosArr[0], angPosArr[1]);
-    serialManager.push_msg(result_str);
+void EncodersManager::angularVel(double (&cur_angPosArr)[2]){
+    uint32_t now = millis();
+    uint32_t dt = now - last_omegaStamp;
+
+    if(omega_min_dt < dt) return;
+
+    enc_R.computeOmega(dt, cur_angPosArr[0]);
+    enc_L.computeOmega(dt, cur_angPosArr[1]);
+    last_omegaStamp = now;
 }
 
 void EncodersManager::initLastAngles(){
@@ -84,18 +89,23 @@ void EncodersManager::initLastAngles(){
 void EncodersManager::execute(){
     double cur_angPosArr[2]; // current ang position for wheels right an left respectively
     angularPos(cur_angPosArr);
-
-    uint32_t now = micros();
-    uint32_t dt = now - last_omegaStamp;
-
-    if(dt > omega_min_dt){
-        enc_R.computeOmega(dt, cur_angPosArr[0]);
-        enc_L.computeOmega(dt, cur_angPosArr[1]);
-        last_omegaStamp = now;
-    }
+    pub_encoders(cur_angPosArr);
+    angularVel(cur_angPosArr);
 }
 
 void EncodersManager::getAngVel(float (&angVel)[2]){
     angVel[0] = enc_R.getOmega();
     angVel[1] = enc_L.getOmega();
+}
+
+void EncodersManager::pub_encoders(double (&cur_angPosArr)[2]){
+    if(!publish) return;
+
+    char result_str[maxNumChar];
+    sprintf(result_str, "@E:%.4f,%.4f;\n", cur_angPosArr[0], cur_angPosArr[1]);
+    serialPublisher.push_msg(result_str);
+}
+
+void EncodersManager::set_publish(bool state){
+    publish = state;
 }

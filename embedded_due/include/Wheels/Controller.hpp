@@ -7,7 +7,7 @@
 
 class PID{
 private:
-    float kp, ki, kd, tau;
+    float kp, ki, kd, kff, tau;
     double max_sat;
     double min_sat;
     double integral;
@@ -16,7 +16,7 @@ private:
     double last_derivative;
     double setpoint;
 public:
-    PID(float kp, float ki, float kd, float time_const = 0.02);
+    PID(float kp, float ki, float kd, float k_ff, float time_const = 0.02);
     ~PID();
     double run(const double current);
     void set_saturation(double max, double min);
