@@ -48,7 +48,7 @@ void Encoder::computeOmega(uint32_t &dt, double &cur_angPos){
     if(dt == 0)
         omega = 0;
     else
-        omega = (cur_angPos - last_angPos) / static_cast<double>(dt) * 1e6;
+        omega = (cur_angPos - last_angPos) / static_cast<double>(dt) * 1e3;
 
     last_angPos = cur_angPos;
 }
@@ -72,7 +72,7 @@ void EncodersManager::angularVel(double (&cur_angPosArr)[2]){
     uint32_t now = millis();
     uint32_t dt = now - last_omegaStamp;
 
-    if(omega_min_dt < dt) return;
+    if(dt < omega_min_dt) return;
 
     enc_R.computeOmega(dt, cur_angPosArr[0]);
     enc_L.computeOmega(dt, cur_angPosArr[1]);

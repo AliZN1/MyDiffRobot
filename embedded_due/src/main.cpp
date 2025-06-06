@@ -5,8 +5,8 @@ uint8_t motorDriverPins[] = {2, 3, 4, 5}; // {m1_A, m1_B, m2_A, m2_B}
 
 SerialPublisher serialPublisher(Serial, 1);
 EncodersManager encodersManager(A1, A0, serialPublisher, 100);
-WheelsCon wheelController(motorDriverPins, encodersManager, 70);
-IMU imu(serialPublisher, 50);
+IMU imu(serialPublisher, 20);
+WheelsCon wheelController(motorDriverPins, encodersManager, imu, 20);
 
 SerialReceiver serialReceiver(Serial, 1, wheelController, encodersManager, imu);
 
@@ -19,8 +19,7 @@ Task* taskList[] = {
 };
 TaskManager taskManager(taskList, sizeof(taskList)/sizeof(Task*));
 
-uint16_t i = 7;
-uint32_t last_time = millis();
+uint32_t last_time = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -31,23 +30,24 @@ void setup() {
 
   if(!imu.begin())
     Serial.println("MPU is not connected!");
-
-  // wheelController.move_cmd(10);
 }
 
 void loop() {
   taskManager.run();
+  
+  // int pause = 20;
 
-  // uint32_t now = millis();
-  // if(now > last_time + 10000){
-  //   if(i > 15){
-  //     wheelController.stop();
-  //     return;
-  //   }
+  // analogWrite(2, 200);
+  // analogWrite(3, 0);
+  // analogWrite(4, 0);
+  // analogWrite(5, 200);
+  
+  // delay(int(pause/2));
+  
+  // analogWrite(2, 50);
+  // analogWrite(3, 0);
+  // analogWrite(4, 0);
+  // analogWrite(5, 50);
 
-  //   wheelController.move_cmd(i);
-  //   Serial.println(i);
-  //   i += 2;
-  //   last_time = now;
-  // }
+  // delay(pause);
 }

@@ -36,52 +36,74 @@ void Wheel::stop(){
 }
 
 // -------------------- wheels controller class
-WheelsCon::WheelsCon(uint8_t (&motorDriverPins)[4], EncodersManager &encodersManager, uint16_t num_tick):
-    Task(num_tick), wheel_R(motorDriverPins[0], motorDriverPins[1]), wheel_L(motorDriverPins[2], motorDriverPins[3]), encodersM(encodersManager) {
+WheelsCon::WheelsCon(uint8_t (&motorDriverPins)[4], EncodersManager &encodersManager, IMU &imu_ref, uint16_t num_tick):
+    Task(num_tick), wheel_R(motorDriverPins[0], motorDriverPins[1]), wheel_L(motorDriverPins[2], motorDriverPins[3]), encodersM(encodersManager), imu(imu_ref), pid_rotation(PID_R_kp, PID_R_ki, PID_R_kd) {
         stopped = true;
+        R_stopped = true;
+        pid_rotation.set_saturation(7, -7);
     }
 
 WheelsCon::~WheelsCon(){}
 
 void WheelsCon::execute(){
-    if(stopped) return;
-
-    float angVel[2];
-    encodersM.getAngVel(angVel);
-    // PID controller has saturation control
-    double velCommand_R = wheel_R.pid.run(angVel[0]);
-    double velCommand_L = wheel_L.pid.run(angVel[1]);
-    
-    wheel_R.move((int16_t)velCommand_R);
-    wheel_L.move((int16_t)velCommand_L);
-
-    // Serial.print("speed: ");
-    // Serial.print(angVel[0]);
-    // Serial.print(", cmd: ");
-    // Serial.println(velCommand_R);
+    if(!stopped){
+        float angVel[2];
+        encodersM.getAngVel(angVel);
+        driveLinear(angVel);
+    }
+    if(!R_stopped){
+        float headingAng = imu.get_gyroYaw();
+        driveAngular(headingAng);
+    }
 }
 
-void WheelsCon::move_cmd(int8_t speed){
-    stopped = false;
+void WheelsCon::set_linearVel(int8_t speed){
     if(speed < -15 || speed > 15) return;
+    stopped = false;
 
     wheel_R.pid.update_setpoint(speed);
     wheel_L.pid.update_setpoint(speed);
-    Serial.println("Setpoints updated");
 }
 
-void WheelsCon::rotateCW(uint8_t speed){
-    wheel_R.moveBackward(speed);
-    wheel_L.moveForward(speed);
+void WheelsCon::driveLinear(float (&angVel)[2]){
+    double velCommand_R = wheel_R.pid.run(angVel[0]); // PID controller has saturation control
+    double velCommand_L = wheel_L.pid.run(angVel[1]); 
+    wheel_R.move((int16_t)velCommand_R);
+    wheel_L.move((int16_t)velCommand_L);
 }
 
-void WheelsCon::rotateCCW(uint8_t speed){
-    wheel_R.moveForward(speed);
-    wheel_L.moveBackward(speed);
+void WheelsCon::set_angularPos(uint16_t angularPos){ //positive speed clockwise rotation and vice versa
+    if(angularPos > 360) return;
+    R_stopped = false;
+
+    headAng_setpoint = angularPos;
+    i = 0;
+    pid_rotation.update_setpoint(angularPos);
 }
 
+void WheelsCon::driveAngular(float cur_angle){
+    if(abs(headAng_setpoint - cur_angle) < 3){
+        if(i > 5) stop();
+        else i++;
+        return;
+    }
+
+    // Serial.print("angle: ");
+    // Serial.print(cur_angle);
+    double angVel = pid_rotation.run(cur_angle);
+    if(abs(angVel) < 2) angVel > 0 ? angVel = 2 : angVel = -2;
+
+    // Serial.print("speed: ");
+    // Serial.println(angVel);
+
+    stopped = false;
+    wheel_L.pid.update_setpoint(angVel);
+    wheel_R.pid.update_setpoint(-angVel);
+}
+ 
 void WheelsCon::stop(){
     stopped = true;
+    R_stopped = true;
     wheel_R.stop();
     wheel_L.stop();
 }

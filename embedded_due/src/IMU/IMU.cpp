@@ -175,3 +175,7 @@ void IMU::pubAccel(){
 void IMU::set_publish(bool state){
     publish = state;
 }
+
+float IMU::get_gyroYaw(){
+    return gyroYaw;
+}

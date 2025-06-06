@@ -74,12 +74,10 @@ void SerialReceiver::processMessage(const char (&msg)[maxNumChar]){
     switch (cmd){
         case move_speed:
             if(value == 0) wheelsCon.stop();
-            else wheelsCon.move_cmd(value);
+            else wheelsCon.set_linearVel(value);
             break;
         case rotate_speed:
-            if(value == 0) wheelsCon.stop();
-            else if(value > 0 && value < 255) wheelsCon.rotateCW(value);
-            else if(value < 0 && value > -255) wheelsCon.rotateCCW(-value);
+            wheelsCon.set_angularPos(value);
             break;
         case encoder_pub:
             if(value == 0) encodersManager.set_publish(0);

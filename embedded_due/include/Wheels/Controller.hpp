@@ -16,7 +16,7 @@ private:
     double last_derivative;
     double setpoint;
 public:
-    PID(float kp, float ki, float kd, float k_ff, float time_const = 0.02);
+    PID(float kp, float ki, float kd, float k_ff=0.0, float time_const=0.02);
     ~PID();
     double run(const double current);
     void set_saturation(double max, double min);

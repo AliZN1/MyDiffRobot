@@ -47,6 +47,7 @@ public:
     bool computeYaw();
     void pubAccel();
     void set_publish(bool state);
+    float get_gyroYaw();
 };
 
 #endif
