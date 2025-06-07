@@ -33,4 +33,9 @@ __pycache__/
 test.py
 # folders
 designTools/
+ros2_brain/install/
+ros2_brain/build/
+ros2_brain/log/
+#bash scripts
+ros2_brain/source_ros2.sh
 
