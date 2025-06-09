@@ -67,7 +67,8 @@ void WheelsCon::set_linearVel(int8_t speed){
 
 void WheelsCon::driveLinear(float (&angVel)[2]){
     double velCommand_R = wheel_R.pid.run(angVel[0]); // PID controller has saturation control
-    double velCommand_L = wheel_L.pid.run(angVel[1]); 
+    double velCommand_L = wheel_L.pid.run(angVel[0]); // this value has to change to angVel[1]. This is just due to a broken encoder.
+    
     wheel_R.move((int16_t)velCommand_R);
     wheel_L.move((int16_t)velCommand_L);
 }

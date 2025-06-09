@@ -102,7 +102,7 @@ void EncodersManager::pub_encoders(double (&cur_angPosArr)[2]){
     if(!publish) return;
 
     char result_str[maxNumChar];
-    sprintf(result_str, "@E:%.4f,%.4f;\n", cur_angPosArr[0], cur_angPosArr[1]);
+    sprintf(result_str, "@%02d:%.4f,%.4f;\n", Encoders_t, cur_angPosArr[0], cur_angPosArr[1]);
     serialPublisher.push_msg(result_str);
 }
 

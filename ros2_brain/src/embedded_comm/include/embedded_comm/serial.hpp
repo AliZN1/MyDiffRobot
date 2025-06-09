@@ -23,9 +23,9 @@ public:
     Serial(const char* portName, int baudRate);
     ~Serial();
     bool connectionState();
-    bool isAvailable(int timeout_ms);
+    bool isAvailable();
     std::string readLine();
-    void writeSerial(char* buffer, size_t size);
+    bool writeSerial(const char* buffer, size_t size);
     void closeSerial();
     void configSerial();
 };

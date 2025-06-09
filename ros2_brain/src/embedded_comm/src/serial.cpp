@@ -61,7 +61,6 @@ void Serial::configSerial(){
 
 int Serial::readSerial(char* buffer, size_t size){
     int n = read(serialPort, buffer, size);
-    
     if(n < 0)
         throw std::runtime_error("Serial read failed: " + std::string(strerror(errno)));
     else if(n == 0){
@@ -76,7 +75,7 @@ int Serial::readSerial(char* buffer, size_t size){
 
 std::string Serial::readLine(){
     if(!isConnected) return ""; 
-
+    
     char tempBuffer[SERIAL_BUFFER_SIZE];
     int res = readSerial(tempBuffer, SERIAL_BUFFER_SIZE);
 
@@ -94,17 +93,26 @@ std::string Serial::readLine(){
     return "";
 }
 
-void Serial::writeSerial(char* buffer, size_t size){
-    write(serialPort, buffer, size);
+bool Serial::writeSerial(const char* buffer, size_t size){
+    size_t total_written = 0;
+    while (total_written < size) {
+        ssize_t bytes_written = write(serialPort, buffer + total_written, size - total_written);
+        if (bytes_written == -1) {
+            perror("Serial write failed");
+            return 0;
+        }
+        total_written += bytes_written;
+    }
+    return 1;
 }
 
-bool Serial::isAvailable(int timeout_ms){
+bool Serial::isAvailable(){
     fd_set readfds;
     struct timeval timeout;
     FD_ZERO(&readfds); // Clear the set
     FD_SET(serialPort, &readfds); // Add 'fd' to the set
-    timeout.tv_sec = timeout_ms / 1000; // Convert milliseconds to seconds
-    timeout.tv_usec = (timeout_ms % 1000) * 1000; // and microseconds
+    timeout.tv_sec = 0; // Convert milliseconds to seconds
+    timeout.tv_usec = 0; // and microseconds
     int result = select(serialPort + 1, &readfds, NULL, NULL, &timeout); // Wait for input
 
     return result > 0 && FD_ISSET(serialPort, &readfds); // Return true if fd is ready to read

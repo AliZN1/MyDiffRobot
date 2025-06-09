@@ -34,20 +34,4 @@ void setup() {
 
 void loop() {
   taskManager.run();
-  
-  // int pause = 20;
-
-  // analogWrite(2, 200);
-  // analogWrite(3, 0);
-  // analogWrite(4, 0);
-  // analogWrite(5, 200);
-  
-  // delay(int(pause/2));
-  
-  // analogWrite(2, 50);
-  // analogWrite(3, 0);
-  // analogWrite(4, 0);
-  // analogWrite(5, 50);
-
-  // delay(pause);
 }

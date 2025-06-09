@@ -22,6 +22,11 @@ enum serial_cmd {
     imu_pub,
 };
 
+enum SensorDataType { 
+    Encoders_t, 
+    IMU_t
+};
+
 class SerialPublisher: public Task{
 private:
     UARTClass &serial;

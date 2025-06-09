@@ -167,7 +167,7 @@ void IMU::pubAccel(){
     if(dt < pub_delay) return;// reduce the data publication freq
 
     char msg [maxNumChar];
-    sprintf(msg, "@I:%.4f\n", gyroYaw);
+    sprintf(msg, "@%02d:%.4f;\n", IMU_t, gyroYaw);
     serialPublisher.push_msg(msg);
     last_pubTime = now;
 }

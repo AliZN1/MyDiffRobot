@@ -29,9 +29,8 @@ __pycache__/
 .vscode/
 *.code-workspace
 
-# test files
-test.py
 # folders
+test/
 designTools/
 ros2_brain/install/
 ros2_brain/build/
