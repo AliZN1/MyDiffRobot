@@ -55,7 +55,7 @@ void SerialManager::ctrl_cmd_callback(const interfaces::msg::CtrlCmd::SharedPtr 
 void SerialManager::send_cmd(uint8_t index, int16_t value){
     char cmd[SERIAL_BUFFER_SIZE];
     sprintf(cmd, "#%02d:%d;\n", index, value);
-    ser.writeSerial(cmd, sizeof(cmd));
+    ser.writeSerial(cmd, strlen(cmd));
 }
 
 bool SerialManager::processSerialReading(std::string &line, uint8_t &index, std::vector<double> &values){

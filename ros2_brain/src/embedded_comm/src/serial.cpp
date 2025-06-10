@@ -56,7 +56,9 @@ void Serial::configSerial(){
     tty.c_oflag &= ~OPOST; // Raw output
 
     // Apply settings
-    tcsetattr(serialPort, TCSANOW, &tty);
+    tcflush(serialPort, TCIOFLUSH);
+    if (tcsetattr(serialPort, TCSANOW, &tty) != 0)
+       throw std::runtime_error("Error applying serial config: " + std::string(strerror(errno)));
 }
 
 int Serial::readSerial(char* buffer, size_t size){
