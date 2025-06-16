@@ -56,7 +56,7 @@ public:
     ~WheelsCon();
     void set_linearVel(int8_t speed);
     void driveLinear(float (&angVel)[2]);
-    void set_angularPos(uint16_t speed);
+    void set_angularPos(int16_t speed);
     void driveAngular(float cur_angle);
     void stop();
 };

@@ -7,11 +7,6 @@
 .DS_Store
 Thumbs.db
 
-# ROS 2 workspace (colcon build system)
-ros2_ws/build/
-ros2_ws/install/
-ros2_ws/log/
-
 # Python cache (if using Python scripts in ROS 2)
 __pycache__/
 *.pyc
@@ -32,9 +27,13 @@ __pycache__/
 # folders
 test/
 designTools/
+# ROS 2 workspace (colcon build system)
 ros2_brain/install/
 ros2_brain/build/
 ros2_brain/log/
+remote_ctrl/install/
+remote_ctrl/build/
+remote_ctrl/log/
 #bash scripts
 ros2_brain/source_ros2.sh
 

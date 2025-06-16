@@ -155,6 +155,7 @@ bool IMU::computeYaw(){
     float elapsedTime = (current_time - last_time) / 1000000.0;
     last_time = current_time;
     gyroYaw += GyroZ * elapsedTime;
+    wrapAng180(gyroYaw);
     
     return 1;
 }
@@ -178,4 +179,11 @@ void IMU::set_publish(bool state){
 
 float IMU::get_gyroYaw(){
     return gyroYaw;
+}
+
+void wrapAng180(float &ang){
+    ang = fmod(ang + 180, 360);
+    if(ang < 0)
+        ang += 360;
+    ang -= 180;
 }

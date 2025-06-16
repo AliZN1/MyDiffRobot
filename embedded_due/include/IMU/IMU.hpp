@@ -50,4 +50,6 @@ public:
     float get_gyroYaw();
 };
 
+void wrapAng180(float &ang);
+
 #endif

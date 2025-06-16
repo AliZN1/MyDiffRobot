@@ -73,8 +73,8 @@ void WheelsCon::driveLinear(float (&angVel)[2]){
     wheel_L.move((int16_t)velCommand_L);
 }
 
-void WheelsCon::set_angularPos(uint16_t angularPos){ //positive speed clockwise rotation and vice versa
-    if(angularPos > 360) return;
+void WheelsCon::set_angularPos(int16_t angularPos){ //positive speed clockwise rotation and vice versa
+    if(angularPos > 180 || angularPos < -180) return;
     R_stopped = false;
 
     headAng_setpoint = angularPos;
@@ -93,7 +93,6 @@ void WheelsCon::driveAngular(float cur_angle){
     // Serial.print(cur_angle);
     double angVel = pid_rotation.run(cur_angle);
     if(abs(angVel) < 2) angVel > 0 ? angVel = 2 : angVel = -2;
-
     // Serial.print("speed: ");
     // Serial.println(angVel);
 

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(embedded_comm)
+project(remote_ctrl)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -9,18 +9,14 @@ endif()
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(interfaces REQUIRED)
-# declare executable
-add_executable(serialManager src/serialManager.cpp src/serial.cpp)
-# Include headers
-target_include_directories(serialManager PUBLIC
+add_executable(simple_controller src/simple_controller.cpp)
+target_include_directories(simple_controller PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
 )
-# Link dependencies
-ament_target_dependencies(serialManager rclcpp interfaces)
-# Install executable
-install(TARGETS serialManager DESTINATION lib/${PROJECT_NAME}
-)
+ament_target_dependencies(simple_controller rclcpp interfaces)
+install(TARGETS simple_controller DESTINATION lib/${PROJECT_NAME})
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)

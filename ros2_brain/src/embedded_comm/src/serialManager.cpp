@@ -1,7 +1,7 @@
 #include "embedded_comm/serialManager.hpp"
 
 
-SerialManager::SerialManager():Node("publish_serial"), ser(devPortName, baudRate){
+SerialManager::SerialManager():Node("serial_manager"), ser(devPortName, baudRate){
     enc_pub_ = this->create_publisher<interfaces::msg::Encoders>("/emb/enc", 1);
     imu_pub_ = this->create_publisher<interfaces::msg::Imu>("/emb/imu", 1);
     ctrl_cmd_sub_ = this->create_subscription<interfaces::msg::CtrlCmd>("/control_cmd", 1, std::bind(&SerialManager::ctrl_cmd_callback, this, _1));
