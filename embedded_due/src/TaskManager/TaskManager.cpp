@@ -6,6 +6,9 @@ TaskManager::TaskManager(Task** taskList, uint8_t size)
 
 TaskManager::~TaskManager(){}
 
+/**
+ * @brief Goes through the tasks list and runs them one after each other.
+ */
 void TaskManager::run(){
     uint32_t now = micros();
     

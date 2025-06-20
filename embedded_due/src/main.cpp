@@ -10,7 +10,7 @@ WheelsCon wheelController(motorDriverPins, encodersManager, imu, 20);
 
 SerialReceiver serialReceiver(Serial, 1, wheelController, encodersManager, imu);
 
-Task* taskList[] = {
+Task* taskList[] = { // A list of all tasks that need to be executed periodically
   &serialPublisher,
   &serialReceiver,
   &encodersManager,
@@ -25,11 +25,11 @@ void setup() {
   Serial.begin(115200);
 
   delay(100);
-  Serial.println("I'm alive!");
+  serialPublisher.push_msg("I'm alive\n");
   encodersManager.initLastAngles();
 
   if(!imu.begin())
-    Serial.println("MPU is not connected!");
+    serialPublisher.push_msg("MPU is not connected!\n");
 }
 
 void loop() {

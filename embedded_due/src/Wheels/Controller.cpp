@@ -6,6 +6,19 @@ PID::PID(float K_p, float K_i, float K_d, float k_ff, float time_const):
 
 PID::~PID(){}
 
+/**
+ * @brief Executes PID logic based on current value and returns controller signal.
+ *
+ * The controller has all three elements of PID control. 
+ * Derivative part has low-pass filter. Additionally, the controller is equipped 
+ * with anti-windup, feed-forward, and saturation control. PID and feed-forward 
+ * gains as well as low-pass filter time constant must be defined in class 
+ * constructor. The saturation limit must be applied using `set_saturation` 
+ * function.
+ * 
+ * @param[in] current current value read from sensor.
+ * @return control signal for the actuator(s).
+ */
 double PID::run(const double current){
     double error = setpoint - current;
     uint32_t now = millis();
@@ -36,15 +49,31 @@ double PID::run(const double current){
     return output;
 }
 
+/**
+ * @brief Changes the signal saturation value.
+ * 
+ * @param[in] max Maximum signal value that PID is allowed to generate.
+ * @param[in] min Minimum signal value that PID is allowed to generate.
+ */
 void PID::set_saturation(double max, double min){
     max_sat = max;
     min_sat = min;
 }
 
+/**
+ * @brief Sets a new reference value for the PID to reach.
+ * 
+ * @param[in] newSetPoint New set point for PID to reach.
+ */
 void PID::update_setpoint(double newSetpoint){
     setpoint = newSetpoint;
 }
 
+/**
+ * @brief Resets the PID and changes the set point to `0`.
+ * 
+ * All internal values used to compute integral and difference are set to `0`.
+ */
 void PID::reset(){
     last_time = 0;
     last_error = 0;

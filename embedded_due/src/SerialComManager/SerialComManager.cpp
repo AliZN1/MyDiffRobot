@@ -12,12 +12,21 @@ void SerialPublisher::execute(){
     send_msg();
 }
 
+/**
+ * Adds a new message to be sent by Serial Port.
+ *
+ * @param[in] msg An array of chars with maximum size of 100.
+ */
 void SerialPublisher::push_msg(const char msg[maxNumChar]) {
     char temp[maxNumChar];
     strncpy(temp, msg, maxNumChar - 1);  // Copy message into a temporary array
     msg_output.push(temp);      // Push the copied message into the queue
 }
 
+/**
+ * Serial prints the earliest message has been added to the queue and pop it out.
+ *
+ */
 void SerialPublisher::send_msg(){
     if(!msg_output.isEmpty()){
         char msg [maxNumChar];
@@ -33,15 +42,30 @@ SerialReceiver::SerialReceiver(UARTClass &b_serial, uint16_t num_tick, WheelsCon
 
 SerialReceiver::~SerialReceiver(){ }
 
+/**
+ * Virtual override function to be run by task manager.
+ *
+ */
 void SerialReceiver::execute(){
     read_msg();
 }
 
+/**
+ * Clears out input buffer for serial fresh read.
+ *
+ */
 void SerialReceiver::resetInputBuffer(){
     inputBuffer[maxNumChar-1] = '\0';
     inputByteIndex = 0;
 }
 
+/**
+ * @brief Reads a char from serial port.
+ * 
+ * If the read character is `new_line_char` the received message saved in inputBuffer will be process.
+ *      Otherwise it will be added to the inputBuffer.
+ *
+ */
 void SerialReceiver::read_msg(){
     if(serial.available() <= 0) return;
     char incomingByte = serial.read();
@@ -56,6 +80,13 @@ void SerialReceiver::read_msg(){
     }
 }
 
+/**
+ * @brief Processes input message to conduct any requested command through serial communication.
+ *
+ * If message has the correct structure of #`cmc_code`:`cmd_value`; it will be processed according the defined commands.
+ * 
+ * @param[in] msg An array of chars with max size of 100.
+ */
 void SerialReceiver::processMessage(const char (&msg)[maxNumChar]){
     if(msg[0] != '#' || msg[3] != ':'){
         // Serial.println("# or : was lost!");// debuging
