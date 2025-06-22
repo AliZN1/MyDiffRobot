@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(remote_ctrl)
+project(camera)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
@@ -8,40 +8,31 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(interfaces REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(image_transport REQUIRED)
 find_package(OpenCV REQUIRED)
-# Executables
-add_executable(simple_controller src/simple_controller.cpp)
-add_executable(camera_stream_rec src/camera_stream_rec.cpp)
+# declare executable
+add_executable(cameraStream src/cameraStream.cpp)
 # Include headers
-target_include_directories(simple_controller PUBLIC
+target_include_directories(cameraStream PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
-target_include_directories(camera_stream_rec PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>)
+  $<INSTALL_INTERFACE:include>
+)
+# Include directories
+include_directories(${OpenCv_INCLUDE_DIRS})
 # Link dependencies
-ament_target_dependencies(simple_controller 
-  rclcpp 
-  interfaces)
-ament_target_dependencies(camera_stream_rec
+ament_target_dependencies(cameraStream 
   rclcpp
   sensor_msgs
   cv_bridge
   image_transport
-  OpenCV)
+  OpenCV
+)
 # Install executable
 install(TARGETS 
-  simple_controller
-  camera_stream_rec
+  cameraStream 
   DESTINATION lib/${PROJECT_NAME})
-
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
