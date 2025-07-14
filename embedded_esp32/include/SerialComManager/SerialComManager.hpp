@@ -25,7 +25,8 @@ enum serial_cmd {
 
 enum SensorDataType { 
     Encoders_t, 
-    IMU_t
+    IMU_t,
+    Battery_t,
 };
 
 class SerialPublisher: public Task{
