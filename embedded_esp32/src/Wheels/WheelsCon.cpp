@@ -58,6 +58,16 @@ void Wheel::stop(){
 }
 
 // -------------------- wheels controller class
+/**
+ * @short Constructor of the WheelsCon (wheels controller) class
+ * 
+ * @param[in] motorDriverPins An array including 4 pin numbers of the motors' driver.
+ *      First two pins are for right wheel and second two are for the left wheel.
+ * @param[in] encodersManager Instance of EncodersManager class to access 
+ *      wheels position and speed.
+ * @param[in] imu_ref Instance of IMU class to access IMU data.
+ * @param[in] num_tick The interval of executing "execute" function in millisecond.
+ */
 WheelsCon::WheelsCon(uint8_t (&motorDriverPins)[4], EncodersManager &encodersManager, IMU &imu_ref, uint16_t num_tick):
     Task(num_tick), wheel_R(motorDriverPins[0], motorDriverPins[1]), wheel_L(motorDriverPins[2], motorDriverPins[3]), encodersM(encodersManager), imu(imu_ref), pid_rotation(PID_R_kp, PID_R_ki, PID_R_kd) {
         stopped = true;

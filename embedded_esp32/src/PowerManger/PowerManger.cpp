@@ -12,7 +12,7 @@
  *      class to communicated with the main board.
  * @param [in] signal_pin Number of the pin connected to the battery 
  *      voltage signal.
- * @param [in] num_ticks The interval of executing "execute" function.
+ * @param [in] num_ticks The interval of executing "execute" function in millisecond.
  */
 PowerManager::PowerManager(SerialPublisher &serial_publisher, uint8_t signal_pin, uint16_t num_ticks): Task(num_ticks), serialPublisher(serial_publisher), signalPin(signal_pin), lowerLimit(100) { 
     read_signal();
@@ -27,7 +27,8 @@ PowerManager::~PowerManager(){
  * executed periodically.
  */
 void PowerManager::execute(){
-    
+    read_signal();
+    publish();
 }
 
 /**
@@ -56,7 +57,7 @@ void PowerManager::publish(){
  */
 void PowerManager::setLowerLimit(float min){
     if(min < LLV){
-        lowerLimit = 5;
+        lowerLimit = 5.5;
         return;
     }
 

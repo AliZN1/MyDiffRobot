@@ -8,7 +8,7 @@
 
 
 #define S2V_ratio 1 // converts obtained signal from battery to its voltage
-#define LLV 5 // hard coded lower limit voltage
+#define LLV 5.5 // hard coded lower limit voltage
 
 
 class PowerManager: public Task{

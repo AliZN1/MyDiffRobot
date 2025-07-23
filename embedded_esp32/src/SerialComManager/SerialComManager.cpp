@@ -37,7 +37,20 @@ void SerialPublisher::send_msg(){
 
 //------------------- Serial Receiver class members
 
-SerialReceiver::SerialReceiver(HardwareSerial &b_serial, uint16_t num_tick, WheelsCon &wheelsController, EncodersManager &encoders_manager, IMU &IMU_sensor)
+/**
+ * @short SerialReceiver class constructor
+ * 
+ * This class manages the received data from through serial communication.
+ * 
+ * @param[in] b_serial Instance of Serial class which is responsible for 
+ *      managing hardware for serial communication
+ * @param[in] wheelsController Instance of WheelsController class. It uses this 
+ *      to callback right member fuctions when receiving a new command.
+ * @param[in]  encoders_manager Instance of EncodersManager class. It uses this 
+ *      to callback right member fuctions when receiving a new command.
+ * @param[in] num_ticks The interval of executing "execute" function in millisecond.
+ */
+SerialReceiver::SerialReceiver(HardwareSerial &b_serial, WheelsCon &wheelsController, EncodersManager &encoders_manager, IMU &IMU_sensor, uint16_t num_tick)
     : Task(num_tick), serial(b_serial), wheelsCon(wheelsController), encodersManager(encoders_manager), imu(IMU_sensor) {}
 
 SerialReceiver::~SerialReceiver(){ }

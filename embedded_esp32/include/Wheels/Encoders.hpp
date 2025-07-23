@@ -8,6 +8,8 @@
 #include <SerialComManager/SerialComManager.hpp>
 
 
+#define DAC_resolution pow(2, 12) - 1
+
 using namespace std;
 class SerialPublisher;
 

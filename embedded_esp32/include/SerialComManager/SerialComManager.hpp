@@ -54,7 +54,7 @@ private:
 protected:
     void execute() override;
 public:
-    SerialReceiver(HardwareSerial &b_serial, uint16_t num_tick, WheelsCon &wheelsController, EncodersManager &encoders_manager, IMU &IMU_sensor);
+    SerialReceiver(HardwareSerial &b_serial, WheelsCon &wheelsController, EncodersManager &encoders_manager, IMU &IMU_sensor, uint16_t num_tick);
     ~SerialReceiver();
     void read_msg();
     void processMessage(const char (&msg)[maxNumChar]);

@@ -2,7 +2,7 @@
 
 // ------------------------------------ Encoder
 Encoder::Encoder(uint8_t pin_num, bool reverseDir): 
-    pin(pin_num), uperLimit(1023), lowerLimit(0), omega(0.0), last_angle(0.0), numTurns(0)
+    pin(pin_num), uperLimit(DAC_resolution), lowerLimit(0), omega(0.0), last_angle(0.0), numTurns(0)
 {
     dir = reverseDir? -1 : 1;
 };

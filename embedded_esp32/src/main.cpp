@@ -1,14 +1,15 @@
 #include <Arduino.h>
 #include <Main.hpp>
 
-uint8_t motorDriverPins[] = {2, 3, 4, 5}; // {m1_A, m1_B, m2_A, m2_B}
+uint8_t motorDriverPins[] = {p_MR_A, p_MR_B, p_ML_A, p_ML_B};
 
-SerialPublisher serialPublisher(Serial, 1);
-EncodersManager encodersManager(A1, A0, serialPublisher, 100);
-IMU imu(serialPublisher, 20);
-WheelsCon wheelController(motorDriverPins, encodersManager, imu, 20);
+SerialPublisher serialPublisher(Serial, c_1ms);
+EncodersManager encodersManager(p_encoder_R, p_encoder_L, serialPublisher, c_100ms);
+IMU imu(serialPublisher, c_20ms);
+WheelsCon wheelController(motorDriverPins, encodersManager, imu, c_20ms);
+PowerManager powerManager(serialPublisher, p_battery_level, c_2s);
 
-SerialReceiver serialReceiver(Serial, 1, wheelController, encodersManager, imu);
+SerialReceiver serialReceiver(Serial, wheelController, encodersManager, imu, c_1ms);
 
 Task* taskList[] = { // A list of all tasks that need to be executed periodically
   &serialPublisher,
@@ -16,10 +17,10 @@ Task* taskList[] = { // A list of all tasks that need to be executed periodicall
   &encodersManager,
   &wheelController,
   &imu,
+  &powerManager,
 };
 TaskManager taskManager(taskList, sizeof(taskList)/sizeof(Task*));
 
-uint32_t last_time = 0;
 
 void setup() {
   Serial.begin(115200);
