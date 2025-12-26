@@ -25,4 +25,5 @@ public:
     void timer_callback();
 };
 
+void guid();
 int main(int argc, char * argv[]);

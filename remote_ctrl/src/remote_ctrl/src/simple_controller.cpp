@@ -102,7 +102,18 @@ void SimpleController::reset_msg(){
     msg.imu_pub = false;
 }
 
+void guid(){
+    std::cout << "keyboard events: " << std::endl;
+    std::cout << "W -> move forward" << std::endl;
+    std::cout << "S -> move backward" << std::endl;
+    std::cout << "A -> CCW rotation" << std::endl;
+    std::cout << "D -> CW rotation" << std::endl;
+    std::cout << "M -> activate/deactivate heading angle publish" << std::endl;
+    std::cout << "N -> activate/deactivate encoders position publish" << std::endl;
+}
+
 int main(int argc, char * argv[]){
+    guid();
     rclcpp::init(argc, argv);
     rclcpp::spin(std::make_shared<SimpleController>());
     rclcpp::shutdown();

@@ -11,7 +11,7 @@
 #include "interfaces/msg/encoders.hpp"
 #include "serial.hpp"
 
-#define devPortName "/dev/ttyACM0"
+#define devPortName "/dev/ttyUSB0"
 #define baudRate B115200
 
 

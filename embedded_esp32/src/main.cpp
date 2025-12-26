@@ -17,7 +17,7 @@ Task* taskList[] = { // A list of all tasks that need to be executed periodicall
   &encodersManager,
   &wheelController,
   &imu,
-  &powerManager,
+  // &powerManager,
 };
 TaskManager taskManager(taskList, sizeof(taskList)/sizeof(Task*));
 

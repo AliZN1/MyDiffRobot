@@ -9,9 +9,9 @@
 #include "TaskManager/Task.hpp"
 
 #define wheel_PID_Kp 10
-#define wheel_PID_Ki 1
-#define wheel_PID_Kd 0
-#define wheel_PID_Kff 15 // feed forward gain
+#define wheel_PID_Ki 0
+#define wheel_PID_Kd 0.1
+#define wheel_PID_Kff 0 // feed forward gain
 #define PID_R_kp 0.1
 #define PID_R_ki 0.1
 #define PID_R_kd 0
