@@ -28,10 +28,14 @@ PowerManager::~PowerManager(){
  * executed periodically.
  */
 void PowerManager::runTask(){
-    if(!power_publisher) return;
+    while(1){
+        readSignal();
 
-    readSignal();
-    publish();
+        if(power_publisher)
+            publish();
+
+        vTaskDelay(pdMS_TO_TICKS(powerManager_d));
+    }
 }
 
 /**

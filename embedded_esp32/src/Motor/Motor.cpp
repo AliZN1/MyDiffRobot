@@ -8,30 +8,6 @@ Motor::Motor(const uint8_t pinA, const uint8_t pinB):pin_A(pinA), pin_B(pinB), p
 Motor::~Motor(){}
 
 /**
- * @brief This function runs the process the motor is required to do.
- */
-// void Motor::runTask(){
-//     int16_t sp_deg;
-//     float angPos;
-
-//     while(1){
-//         if(xQueueReceive(setpoint_q, &sp_deg, 0) == pdPASS)
-//             pid.update_setpoint(deg2rad(sp_deg));
-        
-//         if(xQueueReceive(encoder_q, &angPos, 10) == pdPASS){
-//             float command = pid.run(angPos);
-//             if(command == 0) stop();
-//             else if(command > 0) move(command + 190);
-//             else move(command - 190);
-//         }
-//         else
-//             move(0);
-
-//         vTaskDelay(pdMS_TO_TICKS(CONTROL_TICK));
-//     }
-// }
-
-/**
  * @brief Rotates the motor clockwise at given speed.
  * 
  * @param[in] speed A PWM signal (between 0 to 255) sent to the motor driver.

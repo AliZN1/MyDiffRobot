@@ -3,32 +3,35 @@
 
 /* -------- Constant Vales -------- */ 
 #define DAC_resolution ((1 << 12) - 1)
-#define CONTROL_TICK 10
 #define MAX_MSG_OUT_LEN 32 // serial_out maximum message length
-#define MAX_MSG_IN_LEN 20 // serial read maximum message length
+#define MAX_MSG_IN_LEN  20 // serial read maximum message length
 #define SERIAL_OUT_QUEUE_LEN 5
 const float pi = 3.1415926;
 
 /* -------- I/O pins -------- */ 
-#define p_encoder_R 26
-#define p_encoder_L 25
+#define p_encoder_R     26
+#define p_encoder_L     25
 #define p_battery_level 34
-#define p_ML_A 14 // left wheel
-#define p_ML_B 32 // left wheel
-#define p_MR_A 15 // right wheel
-#define p_MR_B 33 // right wheel
+#define p_ML_A          14 // left wheel
+#define p_ML_B          32 // left wheel
+#define p_MR_A          15 // right wheel
+#define p_MR_B          33 // right wheel
+
+/* -------- Delays -------- */ 
+#define encodersManager_d  10
+#define motorsController_d 10
+#define serialReceiver_d   100
+#define serialReadByte_d   1
+#define serialPublisher_d  50
+#define powerManager_d     2000
 
 /* -------- Flags -------- */ 
 extern bool encoder_publisher;
 extern bool imu_publisher;
 extern bool power_publisher;
+extern bool controller_running;
 
 /* -------- Structures -------- */ 
-struct MotorSetpoint_t {
-    float right;
-    float left;
-};
-
 struct EncoderData_t {
     float right;
     float left;
@@ -63,6 +66,7 @@ enum serial_cmd {
     encoder_pub,
     imu_pub,
 };
+
 
 #endif
 

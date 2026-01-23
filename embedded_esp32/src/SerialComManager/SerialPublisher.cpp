@@ -19,19 +19,12 @@ SerialPublisher::SerialPublisher(HardwareSerial &b_serial, QueueHandle_t &msg_ou
 SerialPublisher::~SerialPublisher(){}
 
 void SerialPublisher::runTask(){
-    send_msg();
-}
+    while(1){
+        send_msg();
 
-/**
- * Adds a new message to be sent by Serial Port.
- *
- * @param[in] msg An array of chars with maximum size of 100.
- */
-// void SerialPublisher::push_msg(const char msg[maxNumChar]) {
-//     char temp[maxNumChar];
-//     strncpy(temp, msg, maxNumChar - 1);  // Copy message into a temporary array
-//     msg_output.push(temp);      // Push the copied message into the queue
-// }
+        vTaskDelay(pdMS_TO_TICKS(serialPublisher_d));
+    }
+}
 
 /**
  * Serial prints the earliest message has been added to the queue and pop it out.

@@ -19,7 +19,7 @@ void EncodersManager::runTask(){
             pub_encoders();
         // angularVel(cur_angPosArr);
 
-        vTaskDelay(pdMS_TO_TICKS(CONTROL_TICK));
+        vTaskDelay(pdMS_TO_TICKS(encodersManager_d));
     }
 }
 
@@ -35,6 +35,8 @@ void EncodersManager::angularPos(){
     enc_data.right = enc_R.updateAngDisp();
     enc_data.left = enc_L.updateAngDisp();
 
+    if(!controller_running) return;
+    
     if(xQueueSendToBack(encoders_q, &enc_data, pdMS_TO_TICKS(0)) != pdPASS)
         Serial.println("fail to write enc data!");
 }

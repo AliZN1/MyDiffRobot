@@ -21,7 +21,11 @@ SerialReceiver::~SerialReceiver(){ }
  *
  */
 void SerialReceiver::runTask(){
-    read_msg();
+    while(1){
+        read_msg();
+
+        vTaskDelay(pdMS_TO_TICKS(serialReceiver_d));
+    }
 }
 
 /**
@@ -29,7 +33,7 @@ void SerialReceiver::runTask(){
  *
  */
 void SerialReceiver::resetInputBuffer(){
-    inputBuffer[MAX_MSG_IN_LEN-1] = '\0';
+    memset(inputBuffer, 0, MAX_MSG_IN_LEN);
     inputByteIndex = 0;
 }
 
@@ -41,18 +45,25 @@ void SerialReceiver::resetInputBuffer(){
  *
  */
 void SerialReceiver::read_msg(){
-    if(serial.available() <= 0) return;
-    char incomingByte = serial.read();
-    if(incomingByte == '\n'){
-        resetInputBuffer();
-        processMessage(inputBuffer);
-    } else{
-        if (inputByteIndex < MAX_MSG_IN_LEN - 1)
+    char incomingByte;
+
+    while(serial.available() > 0){
+        incomingByte = serial.read();
+
+        if(incomingByte == '\n'){
+            processMessage(inputBuffer);    
+            resetInputBuffer();
+        }
+        else if (inputByteIndex < MAX_MSG_IN_LEN - 1)
             inputBuffer[inputByteIndex++] = incomingByte;
         else{
-            inputByteIndex = 0;
+            resetInputBuffer();
+            serial.readString();
             Serial.println("max cmd length is 20 char!");
+            break;
         }
+
+        vTaskDelay(pdMS_TO_TICKS(serialReadByte_d));
     }
 }
 
