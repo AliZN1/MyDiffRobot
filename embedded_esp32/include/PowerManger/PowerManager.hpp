@@ -3,8 +3,9 @@
 
 
 #include <Arduino.h>
-#include "TaskManager/Task.hpp"
-#include "SerialComManager/SerialComManager.hpp"
+#include "Task.hpp"
+#include "freertos/queue.h"
+#include "Config.hpp"
 
 
 #define S2V_ratio 1 // converts obtained signal from battery to its voltage
@@ -13,16 +14,14 @@
 
 class PowerManager: public Task{
 private:
-    SerialPublisher &serialPublisher;
-    uint8_t signalPin;
     float batteryV; // battery voltage
     float lowerLimit;
-    void read_signal();
+    QueueHandle_t serial_out_q;
+    void runTask() override;
+    void readSignal();
     void publish();
-protected:
-    void execute() override;
 public:
-    PowerManager(SerialPublisher &serial_publisher, uint8_t signal_pin, uint16_t num_ticks);
+    PowerManager(QueueHandle_t &msg_out_q);
     ~PowerManager();
     void setLowerLimit(float min);
 };

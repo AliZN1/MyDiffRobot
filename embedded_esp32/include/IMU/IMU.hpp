@@ -2,8 +2,9 @@
 #define IMU_HPP
 
 #include <Wire.h>
-#include "SerialComManager/SerialComManager.hpp"
-#include "TaskManager/Task.hpp"
+#include "Task.hpp"
+#include "Config.hpp"
+#include "freertos/queue.h"
 
 #define mpu_I2CAddr 0x68
 #define mpu_RESET 0x00
@@ -18,11 +19,10 @@
 #define pub_delay 150
 #define bias_tolerance 20
 
-class SerialPublisher;
 
 class IMU: public Task{
 private:
-    SerialPublisher &serialPublisher;
+    QueueHandle_t serial_out_q;
     uint32_t last_time, current_time;
     uint32_t last_pubTime;
     float AccelX, AccelY, AccelZ;
@@ -33,12 +33,12 @@ private:
     float gyroYaw;
     bool isConnected;
     bool publish;
+    void runTask() override;
     bool readAccel(int16_t (&arr)[3]);
     bool readGyro(int16_t &arr);
-protected:
-    void execute() override;
+
 public:
-    IMU(SerialPublisher &sp, uint16_t num_ticks);
+    IMU(QueueHandle_t msg_out_q);
     ~IMU();
     bool begin();
     bool resetPM();

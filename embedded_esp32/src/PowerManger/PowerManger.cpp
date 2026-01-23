@@ -14,8 +14,9 @@
  *      voltage signal.
  * @param [in] num_ticks The interval of executing "execute" function in millisecond.
  */
-PowerManager::PowerManager(SerialPublisher &serial_publisher, uint8_t signal_pin, uint16_t num_ticks): Task(num_ticks), serialPublisher(serial_publisher), signalPin(signal_pin), lowerLimit(100) { 
-    read_signal();
+PowerManager::PowerManager(QueueHandle_t &msg_out_q)
+    : serial_out_q(msg_out_q) { 
+    readSignal();
 }
 
 PowerManager::~PowerManager(){
@@ -26,8 +27,10 @@ PowerManager::~PowerManager(){
  * This is an override function part of Task class which will be
  * executed periodically.
  */
-void PowerManager::execute(){
-    read_signal();
+void PowerManager::runTask(){
+    if(!power_publisher) return;
+
+    readSignal();
     publish();
 }
 
@@ -38,8 +41,8 @@ void PowerManager::execute(){
  * than the defined limit. If so, it publish a zero-volt signal.
  * The battery signal must be connected to an ADC pin of the microcontroller.
  */
-void PowerManager::read_signal(){
-    batteryV = analogRead(signalPin) * S2V_ratio;
+void PowerManager::readSignal(){
+    batteryV = analogRead(p_battery_level) * S2V_ratio;
     if(batteryV < lowerLimit) batteryV = 0;
 }
 
@@ -47,9 +50,9 @@ void PowerManager::read_signal(){
  * @short Publishes the latest battery voltage from 0 to 7.4 volt
  */
 void PowerManager::publish(){
-    char msg[maxNumChar];
-    sprintf(msg, "@%02d:%.2f;\n", Battery_t, batteryV);
-    serialPublisher.push_msg(msg);
+    Message_t msg;
+    sprintf(msg.text, "@%02d:%.2f;\n", Battery_t, batteryV);
+    xQueueSendToBack(serial_out_q, &msg, pdMS_TO_TICKS(0));
 }
 
 /**

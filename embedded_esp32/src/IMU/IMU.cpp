@@ -1,9 +1,8 @@
 #include "IMU/IMU.hpp"
 
-IMU::IMU(SerialPublisher &sp, uint16_t num_ticks)
-    : Task(num_ticks), serialPublisher(sp), last_time(0), last_pubTime(0), publish(false) {
+IMU::IMU(QueueHandle_t msg_out_q){
         gyroYaw = 0.0;
-    }
+}
 
 IMU::~IMU(){}
 
@@ -20,7 +19,7 @@ bool IMU::begin(){
     delay(250);
     
     Wire.beginTransmission(mpu_I2CAddr);
-    byte res = Wire.endTransmission();
+    uint8_t res = Wire.endTransmission();
 
     if(res != 0){
         isConnected = false;
@@ -46,7 +45,7 @@ bool IMU::begin(){
  * Makes sure IMU is connected and computes the Yaw.
  *
  */
-void IMU::execute(){
+void IMU::runTask(){
     if(!isConnected) return;
 
     int succeed = computeYaw();
@@ -68,7 +67,7 @@ bool IMU::resetPM(){
     Wire.beginTransmission(mpu_I2CAddr);
     Wire.write(mpu_PWR_MGMT_1);
     Wire.write(mpu_RESET);
-    byte res = Wire.endTransmission(true);
+    uint8_t res = Wire.endTransmission(true);
     
     Wire.beginTransmission(mpu_I2CAddr); // Command to activate the low pass filter with 10Hz cut off freq
     Wire.write(mpu_CONFIG);
@@ -112,9 +111,9 @@ void IMU::calibrate(){
     
     accelBias[2] += (int16_t)accel_LSB; // The Z axis has to be -1 not zero as it's perpendicular to the round 
 
-    char msg [maxNumChar];
-    sprintf(msg, "IMU calibration is done!\n");
-    serialPublisher.push_msg(msg);
+    Message_t msg;
+    sprintf(msg.text, "IMU calibration is done!\n");
+    xQueueSendToBack(serial_out_q, &msg, pdMS_TO_TICKS(0));
 }
 
 /**
@@ -136,9 +135,9 @@ bool IMU::readAccel(int16_t (&arr)[3]){
     Wire.requestFrom((uint8_t)mpu_I2CAddr,(size_t)6,true); // Request 6 bytes (Accel X, Y, Z)
 
     if(Wire.available() < 6){
-        char msg [maxNumChar];
-        sprintf(msg, "No data available for Accel!\n");
-        serialPublisher.push_msg(msg);
+        Message_t msg;
+        sprintf(msg.text, "No data available for Accel!\n");
+        xQueueSendToBack(serial_out_q, &msg, pdMS_TO_TICKS(0));
         return 0;
     }
 
@@ -190,9 +189,9 @@ bool IMU::readGyro(int16_t &arr){
     current_time = micros();
 
     if(Wire.available() < 6){
-        char msg [maxNumChar];
-        sprintf(msg, "No data available for Gyro!\n");
-        serialPublisher.push_msg(msg);
+        Message_t msg;
+        sprintf(msg.text, "No data available for Gyro!\n");
+        xQueueSendToBack(serial_out_q, &msg, pdMS_TO_TICKS(0));
         return 0;
     }
 
@@ -241,9 +240,9 @@ void IMU::pubAccel(){
     uint32_t dt = now - last_pubTime;
     if(dt < pub_delay) return;// reduce the data publication freq
 
-    char msg [maxNumChar];
-    sprintf(msg, "@%02d:%.4f;\n", IMU_t, gyroYaw);
-    serialPublisher.push_msg(msg);
+    Message_t msg;
+    sprintf(msg.text, "@%02d:%.4f;\n", IMU_t, gyroYaw);
+    xQueueSendToBack(serial_out_q, &msg, pdMS_TO_TICKS(0));
     last_pubTime = now;
 }
 

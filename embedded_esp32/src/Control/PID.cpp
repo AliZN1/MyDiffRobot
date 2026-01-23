@@ -1,8 +1,8 @@
-#include "Wheels/Controller.hpp"
+#include "Control/PID.hpp"
 
 
 PID::PID(float K_p, float K_i, float K_d, float k_ff, float time_const): 
-    kp(K_p), ki(K_i), kd(K_d), kff(k_ff), tau(time_const), setpoint(0) {}
+    kp(K_p), ki(K_i), kd(K_d), kff(k_ff), tau(time_const), setpoint(0), control_active(false), EPS_ON(0.14f), EPS_OFF(0.08f) {}
 
 PID::~PID(){}
 
@@ -19,15 +19,16 @@ PID::~PID(){}
  * @param[in] current current value read from sensor.
  * @return control signal for the actuator(s).
  */
-double PID::run(const double current){
-    double error = setpoint - current;
+float PID::run(const float current){
+    float error = setpoint - current;
+
     uint32_t now = millis();
     float dt = (now - last_time) / 1000.0;
     //compute P, I, and D values
-    double integral_curr = 0.5 * dt * (last_error + error);
-    double alpha = tau / (tau + dt);
-    double filtered_derivative = alpha * last_derivative + (1 - alpha) * (error - last_error) / dt;
-    double output = kp * error + ki * (integral_curr + integral) +  kd * filtered_derivative;
+    float integral_curr = 0.5 * dt * (last_error + error);
+    float alpha = tau / (tau + dt);
+    float filtered_derivative = alpha * last_derivative + (1 - alpha) * (error - last_error) / dt;
+    float output = kp * error + ki * (integral_curr + integral) +  kd * filtered_derivative;
     output += kff * setpoint;
     //apply saturation and anti-windup
     bool allow_integral = true;
@@ -39,12 +40,15 @@ double PID::run(const double current){
         output = min_sat;
         if(error < 0) allow_integral = false;
     }
-    if(allow_integral && ki != 0)
-        integral += integral_curr;
     //store data that is used in the next step
     last_error = error;
     last_derivative = filtered_derivative;
     last_time = now;
+
+    if(hysteresisDeadband(error)) return 0;
+
+    if(allow_integral && ki != 0)
+        integral += integral_curr;
 
     return output;
 }
@@ -55,9 +59,33 @@ double PID::run(const double current){
  * @param[in] max Maximum signal value that PID is allowed to generate.
  * @param[in] min Minimum signal value that PID is allowed to generate.
  */
-void PID::set_saturation(double max, double min){
+void PID::set_saturation(float max, float min){
     max_sat = max;
     min_sat = min;
+}
+
+/**
+ * @brief Apply hysteresis deadband limit near the setpoint
+ * 
+ * @param[in] error reference to error that shows difference between setpoint and current value
+ * @return A boolean, 0 outside deadband activate controller, 1 inside deadband deactivate controller.
+ */
+bool PID::hysteresisDeadband(float &error){
+    if (control_active){
+        // Turn OFF only when entering inner deadband
+        if (abs(error) < EPS_OFF){
+            control_active = false;
+            return true;   // inside deadband → deactivate controller
+        }
+        return false;      // still active
+    }else{
+        // Stay OFF until error exceeds outer threshold
+        if (abs(error) > EPS_ON){
+            control_active = true;
+            return false;  // activate controller
+        }
+        return true;       // remain inside deadband
+    }
 }
 
 /**
@@ -65,8 +93,10 @@ void PID::set_saturation(double max, double min){
  * 
  * @param[in] newSetPoint New set point for PID to reach.
  */
-void PID::update_setpoint(double newSetpoint){
+void PID::update_setpoint(float newSetpoint){
     setpoint = newSetpoint;
+    Serial.print("new setpoint: ");
+    Serial.println(setpoint);
 }
 
 /**
@@ -80,4 +110,5 @@ void PID::reset(){
     integral = 0;
     last_derivative = 0;
     setpoint = 0;
+    control_active = false;
 }
