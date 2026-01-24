@@ -16,6 +16,7 @@ private:
     void runTask() override;
     void rotate();
     static float deg2rad(float ang);
+    static float dist2rad(float dist);
 
 public:
     MotorsController(uint8_t (&motor_driver_pins)[4], QueueHandle_t &encoders_data_q, QueueHandle_t &motion_q);

@@ -14,14 +14,28 @@ void MotorsController::runTask(){
         vTaskDelay(pdMS_TO_TICKS(motorsController_d));
 
         if(xQueueReceive(motion_cmd_q, &motion, pdMS_TO_TICKS(0)) == pdPASS){
-            motor_R.pid.update_setpoint(deg2rad(motion.value));
-            motor_L.pid.update_setpoint(deg2rad(motion.value));
+            switch (motion.type)
+            {
+            case angular_deg:
+                motor_R.pid.update_setpoint(deg2rad(motion.value*2));
+                motor_L.pid.update_setpoint(deg2rad(motion.value*2));
+                break;
+            case linear_dist:
+                motor_R.pid.update_setpoint(deg2rad(motion.value));
+                motor_L.pid.update_setpoint(deg2rad(-1*motion.value));
+                break;
+            default:
+                break;
+            }
             controller_running = true;
         }
 
         switch (motion.type)
         {
         case angular_deg:
+            rotate();
+            break;
+        case linear_dist:
             rotate();
             break;
         default:
@@ -54,4 +68,8 @@ void MotorsController::rotate(){
 
 float MotorsController::deg2rad(float ang){
     return ang * PI / 180;
+}
+
+float dist2rad(float dist){
+    
 }
