@@ -1,9 +1,8 @@
 #include "Motor/Motor.hpp"
 
 
-Motor::Motor(const uint8_t pinA, const uint8_t pinB):pin_A(pinA), pin_B(pinB), pid(motor_PID_Kp, motor_PID_Ki, motor_PID_Kd, motor_PID_Kff, 0.01) {
-        pid.set_saturation(motor_saturation_max, motor_saturation_min);
-}
+Motor::Motor(const uint8_t pinA, const uint8_t pinB)
+    : pin_A(pinA), pin_B(pinB) {}
 
 Motor::~Motor(){}
 

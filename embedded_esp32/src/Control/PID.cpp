@@ -2,7 +2,7 @@
 
 
 PID::PID(float K_p, float K_i, float K_d, float k_ff, float time_const): 
-    kp(K_p), ki(K_i), kd(K_d), kff(k_ff), tau(time_const), setpoint(0), control_active(false), EPS_ON(0.14f), EPS_OFF(0.08f) {}
+    kp(K_p), ki(K_i), kd(K_d), kff(k_ff), tau(time_const), control_active(false), EPS_ON(0.14f), EPS_OFF(0.08f) {}
 
 PID::~PID(){}
 
@@ -19,7 +19,7 @@ PID::~PID(){}
  * @param[in] current current value read from sensor.
  * @return control signal for the actuator(s).
  */
-float PID::run(const float current){
+float PID::step(const float setpoint, const float current){
     float error = setpoint - current;
 
     uint32_t now = millis();
@@ -45,7 +45,7 @@ float PID::run(const float current){
     last_derivative = filtered_derivative;
     last_time = now;
 
-    if(hysteresisDeadband(error)) return 0;
+    // if(hysteresisDeadband(error)) return 0;
 
     if(allow_integral && ki != 0)
         integral += integral_curr;
@@ -89,17 +89,6 @@ bool PID::hysteresisDeadband(float &error){
 }
 
 /**
- * @brief Sets a new reference value for the PID to reach.
- * 
- * @param[in] newSetPoint New set point for PID to reach.
- */
-void PID::update_setpoint(float newSetpoint){
-    setpoint = newSetpoint;
-    Serial.print("new setpoint: ");
-    Serial.println(setpoint);
-}
-
-/**
  * @brief Resets the PID and changes the set point to `0`.
  * 
  * All internal values used to compute integral and difference are set to `0`.
@@ -109,6 +98,5 @@ void PID::reset(){
     last_error = 0;
     integral = 0;
     last_derivative = 0;
-    setpoint = 0;
     control_active = false;
 }

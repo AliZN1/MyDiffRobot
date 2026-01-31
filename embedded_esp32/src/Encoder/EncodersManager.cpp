@@ -2,7 +2,7 @@
 
 
 EncodersManager::EncodersManager(uint8_t pin_R, uint8_t pin_L, QueueHandle_t &msg_out_q, QueueHandle_t &encoder_data_q)
-    : enc_R(pin_R), enc_L(pin_L), serial_out_q(msg_out_q), encoders_q(encoder_data_q){}
+    : enc_R(pin_R), enc_L(pin_L, true), serial_out_q(msg_out_q), encoders_q(encoder_data_q){}
 
 EncodersManager::~EncodersManager(){}
 
@@ -35,10 +35,11 @@ void EncodersManager::angularPos(){
     enc_data.right = enc_R.updateAngDisp();
     enc_data.left = enc_L.updateAngDisp();
 
-    if(!controller_running) return;
+    // if(!controller_running) return;
     
     if(xQueueSendToBack(encoders_q, &enc_data, pdMS_TO_TICKS(0)) != pdPASS)
-        Serial.println("fail to write enc data!");
+        // Serial.println("fail to write enc data!");
+        return;
 }
 
 /**
