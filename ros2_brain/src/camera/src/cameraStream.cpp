@@ -1,6 +1,6 @@
 #include "camera/cameraStream.hpp"
 
-CameraStream::CameraStream(): Node("camera_stream"), cap_(0) { // '0' is default webcam
+CameraStream::CameraStream(): Node("camera_stream"), cap_(0, cv::CAP_V4L2) { // '0' is default webcam
     if(!cap_.isOpened()){
         RCLCPP_ERROR(this->get_logger(), "Failed to open camera");
         rclcpp::shutdown();

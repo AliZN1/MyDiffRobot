@@ -19,7 +19,7 @@ PID::~PID(){}
  * @param[in] current current value read from sensor.
  * @return control signal for the actuator(s).
  */
-float PID::step(const float setpoint, const float current){
+float PID::step(const float current){
     float error = setpoint - current;
 
     uint32_t now = millis();
@@ -45,7 +45,7 @@ float PID::step(const float setpoint, const float current){
     last_derivative = filtered_derivative;
     last_time = now;
 
-    // if(hysteresisDeadband(error)) return 0;
+    if(hysteresisDeadband(error)) return 0;
 
     if(allow_integral && ki != 0)
         integral += integral_curr;
@@ -99,4 +99,9 @@ void PID::reset(){
     integral = 0;
     last_derivative = 0;
     control_active = false;
+}
+
+void PID::setSetpoint(float sp){
+    control_active = true;
+    setpoint = sp;
 }

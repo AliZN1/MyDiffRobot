@@ -6,8 +6,8 @@
 #define MAX_MSG_OUT_LEN      32 // serial_out maximum message length
 #define MAX_MSG_IN_LEN       20 // serial read maximum message length
 #define SERIAL_OUT_QUEUE_LEN 5
-#define wheel_radius_m       0.0337
-#define track_width_m        0.21
+#define wheel_radius_m       0.03375
+#define track_width_m        0.12342
 
 const float pi = 3.14159265358979323846f;
 

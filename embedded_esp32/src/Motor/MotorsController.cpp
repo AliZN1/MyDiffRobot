@@ -24,15 +24,10 @@ void MotorsController::runTask(){
     if(xQueueReceive(encoders_q, &enc_data, 10) == pdPASS)
         Serial.println("no data available from enc!");
 
-    prof_R.reset(enc_data.right, enc_data.right);
-    prof_L.reset(enc_data.left, enc_data.left);
-
     pid_pos_R.reset();
     pid_pos_L.reset();
 
-    const float dt = motorsController_d * 0.001f;
     MotionType_t cmd;
-
     while(1){
         vTaskDelay(pdMS_TO_TICKS(motorsController_d));
 
@@ -45,12 +40,11 @@ void MotorsController::runTask(){
             }
         }
         else if(state == State::RUNNING){
-            stepControl(dt);
+            stepControl();
 
             if(motionFinished()){
                 stopMotors();
                 state = State::IDLE;
-
             }
         }
     }
@@ -62,35 +56,22 @@ void MotorsController::startMotion(MotionType_t &cmd){
         Serial.println("no data available from enc!");
 
 
-    float dR_rad = 0.0;
-    float dL_rad = 0.0;
+    float theta_r = 0.0;
+    float theta_l = 0.0;
 
     if(cmd.type == linear_dist){
         const float dist_m = cmd.value; // meters
         // wheel angle = distance / radius
-        dR_rad = dist_m / wheel_radius_m;
-        dL_rad = dist_m / wheel_radius_m;
-
-        // Limits in wheel space
-        prof_R.set_max_vel_accel(v_lin_max_mps / wheel_radius_m, a_lin_max_mps2 / wheel_radius_m);
-        prof_L.set_max_vel_accel(v_lin_max_mps / wheel_radius_m, a_lin_max_mps2 / wheel_radius_m);
+        theta_r = dist_m / wheel_radius_m;
+        theta_l = dist_m / wheel_radius_m;
     }
     else if(cmd.type == angular_deg){
         const float ang_rad = deg2rad(cmd.value);
         // For in-place rotation:
         // each wheel travels s = (track_width/2) * ang, each wheel rotates q = s / wheel_radius
         float s = (track_width_m * 0.5) * ang_rad;
-        dR_rad = s / wheel_radius_m;
-        dL_rad = -s / wheel_radius_m;
-
-        // Limits in wheel space derived from max robot angular velocity:
-        // wheel linear speed = (track_width/2) * w
-        // wheel angular speed = v_wheel / r
-        float v_wheel_max_mps  = (track_width_m * 0.5f) * w_ang_max_rps;
-        float a_wheel_max_mps2 = (track_width_m * 0.5f) * alpha_max_rps2;
-
-        prof_R.set_max_vel_accel(v_wheel_max_mps / wheel_radius_m, a_wheel_max_mps2 / wheel_radius_m);
-        prof_L.set_max_vel_accel(v_wheel_max_mps / wheel_radius_m, a_wheel_max_mps2 / wheel_radius_m);
+        theta_r = s / wheel_radius_m * ROTATION_GAIN;
+        theta_l = -s / wheel_radius_m * ROTATION_GAIN;
     }
     else{
         cmd.type = motion_none;
@@ -99,8 +80,8 @@ void MotorsController::startMotion(MotionType_t &cmd){
         return;
     }
 
-    prof_R.reset(enc_data.right, enc_data.right + dR_rad);
-    prof_L.reset(enc_data.left, enc_data.left + dL_rad);
+    pid_pos_L.setSetpoint(enc_data.left + theta_l); 
+    pid_pos_R.setSetpoint(enc_data.right + theta_r);
 
     pid_pos_R.reset();
     pid_pos_L.reset();
@@ -109,21 +90,14 @@ void MotorsController::startMotion(MotionType_t &cmd){
 
 }
 
-void MotorsController::stepControl(float dt){
+void MotorsController::stepControl(){
     // read encoders
     if(xQueueReceive(encoders_q, &enc_data, 10) != pdPASS)
         Serial.println("no data available from enc!");
 
-    // update position setpoints from the profiles
-    const float qR_sp = prof_R.step(dt);
-    const float qL_sp = prof_L.step(dt);
-
     // PID position control
-    float uR = pid_pos_R.step(qR_sp, enc_data.right);
-    float uL = pid_pos_L.step(qL_sp, enc_data.left);
-
-    // Optional: deadband / minimum drive to overcome stiction
-    // uR = applyDeadband(uR); uL = applyDeadband(uL);
+    float uR = pid_pos_R.step(enc_data.right);
+    float uL = pid_pos_L.step(enc_data.left);
 
     if(uR == 0) motor_R.stop();
     else if(uR > 0) motor_R.move(uR + 190);
@@ -135,9 +109,7 @@ void MotorsController::stepControl(float dt){
 }
 
 bool MotorsController::motionFinished() {
-    // We check profile completion (position+velocity).
-    // You can also check encoder error directly if you want.
-    return prof_R.finished() && prof_L.finished();
+    return !pid_pos_L.control_active && !pid_pos_R.control_active;
 }
 
 void MotorsController::stopMotors(){
