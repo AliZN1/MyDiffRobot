@@ -19,7 +19,7 @@ PID::~PID(){}
  * @param[in] current current value read from sensor.
  * @return control signal for the actuator(s).
  */
-float PID::step(const float current){
+float PID::step(const float &setpoint, const float &current){
     float error = setpoint - current;
 
     uint32_t now = millis();
@@ -101,7 +101,7 @@ void PID::reset(){
     control_active = false;
 }
 
-void PID::setSetpoint(float sp){
-    control_active = true;
-    setpoint = sp;
-}
+// void PID::setSetpoint(float sp){
+//     control_active = true;
+//     setpoint = sp;
+// }
