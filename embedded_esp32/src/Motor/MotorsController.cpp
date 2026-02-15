@@ -4,15 +4,17 @@
 MotorsController::MotorsController(uint8_t (&mdp)[4], QueueHandle_t &encoders_data_q, QueueHandle_t &motion_q)
     : motor_R(mdp[0], mdp[1]), 
     motor_L(mdp[3], mdp[2]), 
-    pid_pos_R(pos_PID_Kp, pos_PID_Ki, pos_PID_Kd, pos_PID_Kff, time_constant),
-    pid_pos_L(pos_PID_Kp, pos_PID_Ki, pos_PID_Kd, pos_PID_Kff, time_constant),
+    pd_pos_R(pos_PID_Kp, pos_PID_Kd, pos_PID_Kff, time_constant),
+    pd_pos_L(pos_PID_Kp, pos_PID_Kd, pos_PID_Kff, time_constant),
     trap_L(motorsController_d*0.001),
     trap_R(motorsController_d*0.001),
     encoders_q(encoders_data_q), 
     motion_cmd_q(motion_q)
 {
-    pid_pos_R.set_saturation(motor_saturation_max, motor_saturation_min);
-    pid_pos_L.set_saturation(motor_saturation_max, motor_saturation_min);
+    pd_pos_R.setSaturation(motor_saturation_max, motor_saturation_min);
+    pd_pos_L.setSaturation(motor_saturation_max, motor_saturation_min);
+    pd_pos_R.setDeadband(0.03, 0.05);
+    pd_pos_L.setDeadband(0.03, 0.05);
 
     trap_L.set_epsilons(trap_pos_eps, trap_vel_eps);
     trap_R.set_epsilons(trap_pos_eps, trap_vel_eps);
@@ -30,8 +32,8 @@ void MotorsController::runTask(){
     if(xQueueReceive(encoders_q, &enc_data, 10) == pdPASS)
         Serial.println("no data available from enc!");
 
-    pid_pos_R.reset();
-    pid_pos_L.reset();
+    pd_pos_R.reset();
+    pd_pos_L.reset();
 
     MotionType_t cmd;
     while(1){
@@ -86,20 +88,13 @@ void MotorsController::startMotion(MotionType_t &cmd){
         return;
     }
 
-    trap_L.set_max_vel_accel(11, 20);
+    trap_L.set_max_vel_accel(11, 18);
     trap_L.reset(enc_data.left, enc_data.left + theta_l);
-    trap_R.set_max_vel_accel(11, 20);
+    trap_R.set_max_vel_accel(11, 18);
     trap_R.reset(enc_data.right, enc_data.right + theta_r);
 
-    Serial.print(enc_data.left);
-    Serial.print(", ");
-    Serial.println(enc_data.left + theta_l);
-
-    // pid_pos_L.setSetpoint(enc_data.left + theta_l); 
-    // pid_pos_R.setSetpoint(enc_data.right + theta_r);
-
-    pid_pos_R.reset();
-    pid_pos_L.reset();
+    pd_pos_R.reset();
+    pd_pos_L.reset();
 
     state = State::RUNNING;
 
@@ -111,29 +106,29 @@ void MotorsController::stepControl(){
         Serial.println("no data available from enc!");
 
     Serial.print(enc_data.left);
-    Serial.print(", ");
+    Serial.print(",");
+    Serial.println(enc_data.right);
 
     // Trapezoidal Profile
     float cmd_r = trap_R.step();
     float cmd_l = trap_L.step();
-    Serial.println(cmd_l);
 
     // PID position control
-    float uR = pid_pos_R.step(cmd_r, enc_data.right);
-    float uL = pid_pos_L.step(cmd_l, enc_data.left);
+    float uR = pd_pos_R.step(cmd_r, enc_data.right);
+    float uL = pd_pos_L.step(cmd_l, enc_data.left);
 
     if(uR == 0) motor_R.stop();
-    else if(uR > 0) motor_R.move(uR + 190);
-    else motor_R.move(uR - 190);
+    else if(uR > 0) motor_R.move(uR + 170);
+    else motor_R.move(uR - 170);
 
     if(uL == 0) motor_L.stop();
-    else if(uL > 0) motor_L.move(uL + 190);
-    else motor_L.move(uL - 190);
+    else if(uL > 0) motor_L.move(uL + 181);
+    else motor_L.move(uL - 178);
 }
 
 bool MotorsController::motionFinished() {
-    bool a = trap_L.finished() && !pid_pos_L.control_active;
-    bool b = trap_R.finished() && !pid_pos_R.control_active;
+    bool a = trap_L.finished() && !pd_pos_L.control_active;
+    bool b = trap_R.finished() && !pd_pos_R.control_active;
 
     return a && b;
 }

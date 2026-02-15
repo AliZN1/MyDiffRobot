@@ -22,7 +22,7 @@ const float pi = 3.14159265358979323846f;
 #define p_MR_B          33 // right wheel
 
 /* -------- Delays -------- */ 
-#define encodersManager_d  10
+#define encodersManager_d  5
 #define motorsController_d 10
 #define serialReceiver_d   100
 #define serialReadByte_d   1

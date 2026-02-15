@@ -23,6 +23,9 @@ float TrapProfile::step(){
         omega_ref -= dir * a_max * dt;
 
     omega_ref = constrain(omega_ref, -w_max, w_max);
+
+    // Serial.print(",");
+    // Serial.println(omega_ref);
     theta_ref += omega_ref * dt;
 
     // Serial.println(omega_ref);

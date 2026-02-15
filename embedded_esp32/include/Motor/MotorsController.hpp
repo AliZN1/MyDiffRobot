@@ -3,12 +3,12 @@
 #include "stdint.h"
 #include "Config.hpp"
 #include "Motor/Motor.hpp"
-#include "Control/PID.hpp"
+#include "Control/PD.hpp"
 #include "Control/TrapProfile.hpp"
 #include "Task.hpp"
 #include "freertos/queue.h"
 
-#define pos_PID_Kp           8
+#define pos_PID_Kp           12
 #define pos_PID_Ki           0
 #define pos_PID_Kd           0.4
 #define pos_PID_Kff          0 // feed forward gain
@@ -29,8 +29,8 @@ class MotorsController: public Task{
 private:
     Motor motor_R;
     Motor motor_L;
-    PID pid_pos_R;
-    PID pid_pos_L;
+    PD pd_pos_R;
+    PD pd_pos_L;
     TrapProfile trap_R;
     TrapProfile trap_L;
 

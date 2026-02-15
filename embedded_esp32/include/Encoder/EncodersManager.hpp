@@ -20,9 +20,6 @@ public:
     EncodersManager( uint8_t pin_R, uint8_t pin_L, QueueHandle_t &msg_out_q, QueueHandle_t &encoder_data_q);
     ~EncodersManager();
     void angularPos();
-    void angularVel();
-    void initLastAngles();
-    void getAngVel(float (&angVel)[2]); // return right and left omega respectively
     void pub_encoders();
 };
 

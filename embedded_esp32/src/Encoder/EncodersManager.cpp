@@ -13,11 +13,13 @@ EncodersManager::~EncodersManager(){}
  * Publishes the results if activated.
  */
 void EncodersManager::runTask(){
+    enc_L.setLimits(0, 4095);
+    enc_R.setLimits(0, 4095);
+
     while(1){
         angularPos();
         if(encoder_publisher) 
             pub_encoders();
-        // angularVel(cur_angPosArr);
 
         vTaskDelay(pdMS_TO_TICKS(encodersManager_d));
     }
@@ -37,60 +39,8 @@ void EncodersManager::angularPos(){
 
     // if(!controller_running) return;
     
-    if(xQueueSendToBack(encoders_q, &enc_data, pdMS_TO_TICKS(0)) != pdPASS)
-        // Serial.println("fail to write enc data!");
+    if(xQueueOverwrite(encoders_q, &enc_data) != pdPASS)
         return;
-}
-
-/**
- * @brief Computes both encoders' current angular velocity.
- * 
- * To avoid division by zero, it returns `0` for both encoders' 
- * angular velocity if time stamps have less than 1 millisecond
- * difference.
- * 
- * @param[out] cru_angPosArr A 2-element array to store the 
- *      current angular position of the encoders.
- */
-void EncodersManager::angularVel(){
-    EncoderData_t enc_data;
-    xQueuePeek(encoders_q, &enc_data, pdMS_TO_TICKS(0));
-
-    uint32_t now = millis();
-    uint32_t dt = now - last_omegaStamp;
-
-    if(dt < omega_min_dt){
-        enc_data.right = 0;
-        enc_data.left = 0;
-        return;
-    }
-
-    enc_R.computeOmega(dt, enc_data.right);
-    enc_L.computeOmega(dt, enc_data.left);
-    last_omegaStamp = now;
-}
-
-/**
- * @brief Stores the inital angle of both encoders.
- * 
- * Time stamp for angular velocity is initialized as well.
- */
-void EncodersManager::initLastAngles(){
-    enc_R.initLastAngle();
-    enc_L.initLastAngle();
-
-    last_omegaStamp = micros();
-}
-
-/**
- * @brief To access encoders' angular velocity
- * 
- * @param[out] angVel A 2-element array to store the current 
- *      angular velocity of the encoders.
- */
-void EncodersManager::getAngVel(float (&angVel)[2]){
-    angVel[0] = enc_R.getOmega();
-    angVel[1] = enc_L.getOmega();
 }
 
 /**
